@@ -1,2 +1,2 @@
-# ASU-CIS-440-Group-5
-Group 5 &lt;init> to win it's project repository
+# ProjectTemplate
+copy this code into your own repository, and use it for your project as you see fit!

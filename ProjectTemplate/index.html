@@ -1,43 +1,153 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8" />
-	<title></title>
+    <meta charset="utf-8" />
+    <title>Employee Feedback Survey</title>
 	<!--DO NOT FORGET THIS SCRIPT TAG SO YOU CAN USE JQUERY!!!!!-->
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
-	<!--YOUR OWN JAVASCRIPT CAN GO RIGHT HERE-->
-	<script type="text/javascript">
-		function TestButtonHandler() {
-			var webMethod = "ProjectServices.asmx/TestConnection";
-			var parameters = "{}";
+	<!--CSS-->
+    <style>
+        html {
+            height: 100%;
+            width: 100%;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+        }
+
+        #surveyContainer {
+            background-color: white;
+            margin-top: 50px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 500px;
+        }
+
+        button {
+            margin-top: 20px;
+        }
+    </style>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            createSurvey();
+
+            $("#submitSurvey").click(function () {
+                submitSurvey();
+            });
+        });
+
+        function TestButtonHandler() {
+            var webMethod = "ProjectServices.asmx/TestConnection";
+            var parameters = "{}";
+
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                data: parameters,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    var responseFromServer = msg.d;
+                    alert(responseFromServer);
+                },
+                error: function (e) {
+                    alert("Unable to access the webservice.");
+                }
+            });
+        }
+
+        const questions = {
+            "work environment": [
+                "I feel that my work environment is positive and supportive.",
+                "I have a good work-life balance.",
+                "My workplace is well-organized and efficient.",
+                "I feel safe and secure in my workplace.",
+                "My work environment motivates me to be productive."
+            ],
+            "tools & resources": [
+                "I have access to all the tools and resources I need for my job.",
+                "The technology provided helps me to perform my job effectively.",
+                "I receive adequate training to use the tools and resources effectively.",
+                "Tools and resources are regularly updated and maintained.",
+                "I can easily access support when I have issues with tools or resources."
+            ],
+            "management": [
+                "I feel that my manager supports my professional development.",
+                "I receive regular and constructive feedback from my management.",
+                "Management communicates effectively with employees.",
+                "I trust the decisions made by management.",
+                "Management is approachable and open to suggestions."
+            ]
+        };
+
+        function getRandomQuestion(category) {
+            const randomIndex = Math.floor(Math.random() * questions[category].length);
+            return questions[category][randomIndex];
+        }
+
+        function createSurvey() {
+            const surveyForm = document.getElementById('surveyForm');
+            for (const category in questions) {
+                const questionText = getRandomQuestion(category);
+                const questionDiv = document.createElement('div');
+                questionDiv.innerHTML = `
+                    <p>${questionText}</p>
+                    <input type="radio" name="${category}" value="Strongly agree"> Strongly agree<br>
+                    <input type="radio" name="${category}" value="Agree"> Agree<br>
+                    <input type="radio" name="${category}" value="Neutral"> Neutral<br>
+                    <input type="radio" name="${category}" value="Disagree"> Disagree<br>
+                    <input type="radio" name="${category}" value="Strongly disagree"> Strongly disagree<br>
+                `;
+                surveyForm.appendChild(questionDiv);
+            }
+        }
+
+        function submitSurvey() {
+            var surveyResponses = {};
+            $("#surveyForm input[type='radio']:checked").each(function () {
+                var name = $(this).attr("name");
+                var value = $(this).val();
+                surveyResponses[name] = value;
+            });
+
+            var webMethod = "ProjectServices.asmx/SubmitSurvey";
+            var parameters = "{\"responses\":" + JSON.stringify(surveyResponses) + "}";
 
 			//jQuery ajax method
-			$.ajax({
-				type: "POST",
-				url: webMethod,
-				data: parameters,
-				contentType: "application/json; charset=utf-8",
-				dataType: "json",
-				success: function (msg) {
-					var responseFromServer = msg.d;
-					alert(responseFromServer);
-				},
-				error: function (e) {
-					alert("this code will only execute if javascript is unable to access the webservice");
-				}
-			});
-		}
-	</script>
-	<!--END OF YOUR OWN JAVASCRIPT-->
-
-	<!--AND YOUR OWN CSS CAN GO HERE AS WELL-->
-	<style>
-
-	</style>
-	<!--END OF YOUR OWN CSS-->
-</head >
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                data: parameters,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    $("#surveyForm").hide();
+                    $("#confirmationMessage").show();
+                },
+                error: function (e) {
+                    alert("Error submitting the survey.");
+                }
+            });
+        }
+    </script>
+</head>
 <body>
-	<button onclick="javascript: TestButtonHandler();">Click here to test connection!</button>
+    <div id="surveyContainer">
+        <h2>Employee Feedback Survey</h2>
+        <form id="surveyForm">
+            <!-- Questions will be inserted here by JavaScript -->
+        </form>
+        <button id="submitSurvey">Submit</button>
+        <div id="confirmationMessage" style="display:none;">
+            Thank you for your feedback!
+        </div>
+    </div>
+    <button onclick="javascript: TestButtonHandler();">Click here to test connection!</button>
 </body>
-</html >
+</html>

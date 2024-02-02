@@ -1,68 +1,68 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8" />
-	<title></title>
-	<!--DO NOT FORGET THIS SCRIPT TAG SO YOU CAN USE JQUERY!!!!!-->
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <meta charset="utf-8" />
+    <title></title>
+    <!--DO NOT FORGET THIS SCRIPT TAG SO YOU CAN USE JQUERY!!!!!-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
-	<!--YOUR OWN JAVASCRIPT CAN GO RIGHT HERE-->
-	<script type="text/javascript">
-		function TestButtonHandler() {
-			var webMethod = "ProjectServices.asmx/TestConnection";
-			var parameters = "{}";
+    <!--YOUR OWN JAVASCRIPT CAN GO RIGHT HERE-->
+    <script type="text/javascript">
+        function TestButtonHandler() {
+            var webMethod = "ProjectServices.asmx/TestConnection";
+            var parameters = "{}";
 
-			//jQuery ajax method
-			$.ajax({
-				type: "POST",
-				url: webMethod,
-				data: parameters,
-				contentType: "application/json; charset=utf-8",
-				dataType: "json",
-				success: function (msg) {
-					var responseFromServer = msg.d;
-					alert(responseFromServer);
-				},
-				error: function (e) {
-					alert("this code will only execute if javascript is unable to access the webservice");
-				}
-			});
-		}
+            //jQuery ajax method
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                data: parameters,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    var responseFromServer = msg.d;
+                    alert(responseFromServer);
+                },
+                error: function (e) {
+                    alert("this code will only execute if javascript is unable to access the webservice");
+                }
+            });
+        }
 
-        document.getElementById('logonForm').addEventListener('submit', function (event) {
-            event.preventDefault();
-
+        function logon() {
+            // Get user input
             var username = document.getElementById('username').value;
             var password = document.getElementById('password').value;
 
-            // AJAX request to server-side endpoint
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/login', true); // Replace '/login' with your server-side script URL
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.onreadystatechange = function () {
-                if (this.readyState === XMLHttpRequest.DONE) {
-                    var response = JSON.parse(this.responseText);
-                    if (this.status === 200 && response.success) {
-                        // Handle successful login
-                        document.getElementById('loginResult').innerText = 'Login successful!';
-                        // Optionally redirect to another page
-                        // window.location.href = '/successPage.html';
-                    } else {
-                        // Handle failed login
-                        document.getElementById('loginResult').innerText = 'Login failed. Invalid username or password.';
+            var webMethod = "ProjectServices.asmx/LogOn";
+            var parameters = "{\"uid\":\"" + encodeURI(username) + "\", \"pass\":\"" + encodeURI(password) + "\"}";
+
+            //jQuery ajax method
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                data: parameters,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    var responseFromServer = msg.d;
+                    if (responseFromServer == true) {
+                        window.location.href = 'home.html';
+                        alert("Logged In!")
                     }
+                    else {
+                        alert("Bad Credentials")
+                    }
+                },
+                error: function (e) {
+                    alert("An error occurred while trying to access the web service");
                 }
-            };
-            xhr.send(JSON.stringify({ username: username, password: password }));
-        });
-
-
-
-	</script>
-	<!--END OF YOUR OWN JAVASCRIPT-->
-
-	<!--AND YOUR OWN CSS CAN GO HERE AS WELL-->
-	<style>
+            });
+        }
+    </script>
+    <!--END OF YOUR OWN JAVASCRIPT-->
+    <!--AND YOUR OWN CSS CAN GO HERE AS WELL-->
+    <style>
         /* General Body Styles */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -75,25 +75,9 @@
             color: #333;
         }
 
-        /* Logon Form Container */
-        .logon-form {
-            background-color: #ffffff;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 300px;
-        }
-
-        /* Form Heading */
-        .logon-form h2 {
-            text-align: center;
-            color: #0d6efd;
-            margin-bottom: 30px;
-        }
-
-        /* Form Group */
-        .form-group {
-            margin-bottom: 20px;
+        /* Form Container */
+        .form-container {
+            width: 300px; /* Adjust the width as needed */
         }
 
         /* Labels */
@@ -110,18 +94,19 @@
             border: 1px solid #ced4da;
             border-radius: 5px;
             font-size: 16px;
+            margin-bottom: 20px; /* Space between input fields */
         }
 
-        /* Focus Effect on Input Fields */
-        input[type="text"]:focus, input[type="password"]:focus {
-            outline: none;
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
-        }
+            /* Focus Effect on Input Fields */
+            input[type="text"]:focus, input[type="password"]:focus {
+                outline: none;
+                border-color: #0d6efd;
+                box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+            }
 
         /* Submit Button */
-        button[type="submit"] {
-            width: 110%; /* Same width as input fields */
+        #loginButton {
+            width: 108%;
             padding: 10px;
             border: none;
             border-radius: 5px;
@@ -130,40 +115,28 @@
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s;
-            margin-top: 20px; /* Added margin to lower the button */
         }
 
-        /* Hover Effect on Submit Button */
-        button[type="submit"]:hover {
-            background-color: #0b5ed7;
-        }
-
-
-	</style>
-	<!--END OF YOUR OWN CSS-->
-</head >
+            /* Hover Effect on Submit Button */
+            #loginButton:hover {
+                background-color: #0b5ed7;
+            }
+    </style>
+</head>
 <body>
-
-
-
-    <form id="logonForm" method="post" action="/Account/Login">
-        <h2> Log In </h2>
+    <div class="form-container">
+        <h2>Log In</h2>
         <div>
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required>
         </div>
         <div>
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
+            <input type="password" id="password" name="password" required> <!-- Changed type to "password" -->
         </div>
         <div>
-            <button type="submit">Log In</button>
+            <button id="loginButton" onclick="javascript: logon();">Log In</button>
         </div>
-    </form>
-
-    <!-- Place for displaying login result or error -->
-    <div id="loginResult"></div>
-
-
+    </div>
 </body>
-</html >
+</html>

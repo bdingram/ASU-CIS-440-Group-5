@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>Feedbacker</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			margin: 0;
+			padding: 0;
+			background-color: #e6e6e6;
+		}
+
+		.header {
+			background-color: #4a69bd;
+			color: white;
+			padding: 10px 0;
+			text-align: center;
+			position: relative; /* Added for relative positioning */
+		}
+
+		.nav-bar {
+			background-color: #60a3bc;
+			overflow: hidden;
+		}
+
+		.nav-bar a {
+			float: left;
+			display: block;
+			color: white;
+			text-align: center;
+			padding: 14px 16px;
+			text-decoration: none;
+		}
+
+		.nav-bar a:hover {
+			background-color: #82ccdd;
+			color: black;
+		}
+
+		.main-content {
+			margin: 15px;
+			padding: 15px;
+			background-color: white;
+			border-radius: 5px;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		}
+
+		.logout-button {
+			background-color: slategrey;
+			color: white;
+			padding: 10px 20px;
+			text-align: center;
+			text-decoration: none;
+			display: inline-block;
+			cursor: pointer;
+			border-radius: 5px;
+			position: absolute; /* Absolute positioning within the header */
+			right: 20px; /* Align to the right */
+			top: 50%;
+			transform: translateY(+140%); /* Center vertically in the header */
+		}
+
+        .logout-button:hover {
+            background-color: #82ccdd;
+        }
+	</style>
+</head>
+<body>
+	<div class="header">
+		<h1>Feedbacker</h1>
+		<a href="login.html" class="logout-button">Logout</a> <!-- Logout button -->
+	</div>
+	<div class="nav-bar">
+		<a href="#home">Home</a>
+		<a href="#services">Services</a>
+	</div>
+	<div class="main-content">
+		<h2>Homepage</h2>
+		<p>Welcome to Feedbacker!</p>
+		<!-- Additional content can be added here -->
+	</div>
+</body>
+</html>

@@ -109,7 +109,7 @@
     <Content Include="Global.asax" />
     <Content Include="CreateUser.html" />
     <Content Include="home.html" />
-    <Content Include="index - Copy.html" />
+    <Content Include="survey.html" />
     <Content Include="login.html" />
     <Content Include="index.html" />
     <Content Include="ProjectServices.asmx" />

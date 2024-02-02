@@ -23,19 +23,19 @@
 			overflow: hidden;
 		}
 
-		.nav-bar a {
-			float: left;
-			display: block;
-			color: white;
-			text-align: center;
-			padding: 14px 16px;
-			text-decoration: none;
-		}
+			.nav-bar a {
+				float: left;
+				display: block;
+				color: white;
+				text-align: center;
+				padding: 14px 16px;
+				text-decoration: none;
+			}
 
-		.nav-bar a:hover {
-			background-color: #82ccdd;
-			color: black;
-		}
+				.nav-bar a:hover {
+					background-color: #82ccdd;
+					color: black;
+				}
 
 		.main-content {
 			margin: 15px;
@@ -60,9 +60,25 @@
 			transform: translateY(+140%); /* Center vertically in the header */
 		}
 
-        .logout-button:hover {
-            background-color: #82ccdd;
-        }
+			.logout-button:hover {
+				background-color: #82ccdd;
+			}
+
+		.survey-button {
+			background-color: #4caf50; /* Green color for survey button */
+			color: white;
+			padding: 10px 20px;
+			text-align: center;
+			text-decoration: none;
+			display: inline-block;
+			cursor: pointer;
+			border-radius: 5px;
+			margin-top: 20px; /* Space above the button */
+		}
+
+			.survey-button:hover {
+				background-color: #66bb6a; /* Lighter green on hover */
+			}
 	</style>
 </head>
 <body>
@@ -77,6 +93,8 @@
 	<div class="main-content">
 		<h2>Homepage</h2>
 		<p>Welcome to Feedbacker!</p>
+		<!-- Survey button -->
+		<a href="survey.html" class="survey-button">Take a Survey</a>
 		<!-- Additional content can be added here -->
 	</div>
 </body>

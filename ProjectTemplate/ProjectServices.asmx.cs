@@ -98,6 +98,33 @@ namespace ProjectTemplate
 
         }
 
+        // New method to handle survey submission
+        [WebMethod(EnableSession = true)]
+        public string SubmitSurvey(Dictionary<string, string> responses)
+        {
+            try
+            {
+                using (MySqlConnection con = new MySqlConnection(getConString()))
+                {
+                    con.Open();
+                    foreach (var response in responses)
+                    {
+                        string query = "INSERT INTO survey_responses (category, response) VALUES (@category, @response)";
+                        MySqlCommand cmd = new MySqlCommand(query, con);
+                        cmd.Parameters.AddWithValue("@category", response.Key);
+                        cmd.Parameters.AddWithValue("@response", response.Value);
+                        cmd.ExecuteNonQuery();
+                    }
+                    con.Close();
+                }
+                return "Survey responses recorded successfully.";
+            }
+            catch (Exception e)
+            {
+                return "Error in SubmitSurvey: " + e.Message;
+            }
+        }
+
 
     }
 

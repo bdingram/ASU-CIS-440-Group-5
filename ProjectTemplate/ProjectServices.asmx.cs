@@ -14,6 +14,12 @@ namespace ProjectTemplate
 	[System.ComponentModel.ToolboxItem(false)]
 	[System.Web.Script.Services.ScriptService]
 
+	public class SurveyResponse
+    {
+        public string Category { get; set; }
+        public string Response { get; set; }
+    }
+
 	public class ProjectServices : System.Web.Services.WebService
 	{
 		////////////////////////////////////////////////////////////////////////
@@ -64,7 +70,8 @@ namespace ProjectTemplate
 		}
 		// New method to handle survey submission
         [WebMethod(EnableSession = true)]
-        public string SubmitSurvey(Dictionary<string, string> responses)
+		[ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+        public string SubmitSurvey(List<SurveyResponse> responses)
         {
             try
             {

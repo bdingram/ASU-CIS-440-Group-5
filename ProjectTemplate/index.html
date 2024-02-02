@@ -109,15 +109,15 @@
         }
 
         function submitSurvey() {
-            var surveyResponses = {};
+            var surveyResponses = [];
             $("#surveyForm input[type='radio']:checked").each(function () {
                 var name = $(this).attr("name");
                 var value = $(this).val();
-                surveyResponses[name] = value;
+                surveyResponses.push({ Category: name, Response: value });
             });
 
             var webMethod = "ProjectServices.asmx/SubmitSurvey";
-            var parameters = "{\"responses\":" + JSON.stringify(surveyResponses) + "}";
+            var parameters = JSON.stringify({ responses: surveyResponses });
 
 			//jQuery ajax method
             $.ajax({

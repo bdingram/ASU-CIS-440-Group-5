@@ -1,0 +1,169 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title></title>
+	<!--DO NOT FORGET THIS SCRIPT TAG SO YOU CAN USE JQUERY!!!!!-->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+	<!--YOUR OWN JAVASCRIPT CAN GO RIGHT HERE-->
+	<script type="text/javascript">
+		function TestButtonHandler() {
+			var webMethod = "ProjectServices.asmx/TestConnection";
+			var parameters = "{}";
+
+			//jQuery ajax method
+			$.ajax({
+				type: "POST",
+				url: webMethod,
+				data: parameters,
+				contentType: "application/json; charset=utf-8",
+				dataType: "json",
+				success: function (msg) {
+					var responseFromServer = msg.d;
+					alert(responseFromServer);
+				},
+				error: function (e) {
+					alert("this code will only execute if javascript is unable to access the webservice");
+				}
+			});
+		}
+
+        document.getElementById('logonForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            var username = document.getElementById('username').value;
+            var password = document.getElementById('password').value;
+
+            // AJAX request to server-side endpoint
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/login', true); // Replace '/login' with your server-side script URL
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onreadystatechange = function () {
+                if (this.readyState === XMLHttpRequest.DONE) {
+                    var response = JSON.parse(this.responseText);
+                    if (this.status === 200 && response.success) {
+                        // Handle successful login
+                        document.getElementById('loginResult').innerText = 'Login successful!';
+                        // Optionally redirect to another page
+                        // window.location.href = '/successPage.html';
+                    } else {
+                        // Handle failed login
+                        document.getElementById('loginResult').innerText = 'Login failed. Invalid username or password.';
+                    }
+                }
+            };
+            xhr.send(JSON.stringify({ username: username, password: password }));
+        });
+
+
+
+	</script>
+	<!--END OF YOUR OWN JAVASCRIPT-->
+
+	<!--AND YOUR OWN CSS CAN GO HERE AS WELL-->
+	<style>
+        /* General Body Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+
+        /* Logon Form Container */
+        .logon-form {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+
+        /* Form Heading */
+        .logon-form h2 {
+            text-align: center;
+            color: #0d6efd;
+            margin-bottom: 30px;
+        }
+
+        /* Form Group */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        /* Labels */
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        /* Input Fields */
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        /* Focus Effect on Input Fields */
+        input[type="text"]:focus, input[type="password"]:focus {
+            outline: none;
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+        }
+
+        /* Submit Button */
+        button[type="submit"] {
+            width: 110%; /* Same width as input fields */
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #0d6efd;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px; /* Added margin to lower the button */
+        }
+
+        /* Hover Effect on Submit Button */
+        button[type="submit"]:hover {
+            background-color: #0b5ed7;
+        }
+
+
+	</style>
+	<!--END OF YOUR OWN CSS-->
+</head >
+<body>
+
+
+
+    <form id="logonForm" method="post" action="/Account/Login">
+        <h2> Log In </h2>
+        <div>
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div>
+            <button type="submit">Log In</button>
+        </div>
+    </form>
+
+    <!-- Place for displaying login result or error -->
+    <div id="loginResult"></div>
+
+
+</body>
+</html >

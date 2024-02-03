@@ -2,6 +2,37 @@
 <html>
 <head>
 	<title>Feedbacker</title>
+	<!-- Include jQuery -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+	<script>
+
+		$(document).ready(function () {
+            var webMethod = "ProjectServices.asmx/GetSurveyResponses";
+			var parameters = "{}";
+
+			$.ajax({
+				type: "GET",
+				url: webMethod,
+				data: parameters,
+				dataType: "json",
+				success: function (data) {
+					console.log("Response data:", data);
+
+					data.forEach(function (response) {
+						var stringifiedResponse = JSON.stringify(response, null, 2);
+                        $('#surveyResponseList').append('<li><pre>' + stringifiedResponse + '</pre></li>');
+					});
+				},
+				error: function (xhr, status, error) {
+					console.log("AJAX Error:", xhr.status, status, error);
+				}
+			});
+		});
+
+
+
+	</script>
 	<style>
 		body {
 			font-family: Arial, sans-serif;
@@ -15,7 +46,7 @@
 			color: white;
 			padding: 10px 0;
 			text-align: center;
-			position: relative; /* Added for relative positioning */
+			position: relative;
 		}
 
 		.nav-bar {
@@ -37,12 +68,26 @@
 					color: black;
 				}
 
-		.main-content {
+		.content-container {
+			display: flex;
 			margin: 15px;
+		}
+
+		.main-content {
+			flex: 1;
 			padding: 15px;
 			background-color: white;
 			border-radius: 5px;
 			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		}
+
+		.survey-responses {
+			width: 70%;
+			padding: 15px;
+			background-color: white;
+			border-radius: 5px;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+			margin-left: 20px;
 		}
 
 		.logout-button {
@@ -54,10 +99,10 @@
 			display: inline-block;
 			cursor: pointer;
 			border-radius: 5px;
-			position: absolute; /* Absolute positioning within the header */
-			right: 20px; /* Align to the right */
+			position: absolute;
+			right: 20px;
 			top: 50%;
-			transform: translateY(+140%); /* Center vertically in the header */
+			transform: translateY(+140%);
 		}
 
 			.logout-button:hover {
@@ -65,7 +110,7 @@
 			}
 
 		.survey-button {
-			background-color: #4caf50; /* Green color for survey button */
+			background-color: #4caf50;
 			color: white;
 			padding: 10px 20px;
 			text-align: center;
@@ -73,29 +118,37 @@
 			display: inline-block;
 			cursor: pointer;
 			border-radius: 5px;
-			margin-top: 20px; /* Space above the button */
+			margin-top: 20px;
 		}
 
 			.survey-button:hover {
-				background-color: #66bb6a; /* Lighter green on hover */
+				background-color: #66bb6a;
 			}
 	</style>
+
+
 </head>
 <body>
 	<div class="header">
 		<h1>Feedbacker</h1>
-		<a href="login.html" class="logout-button">Logout</a> <!-- Logout button -->
+		<a href="login.html" class="logout-button">Logout</a>
 	</div>
 	<div class="nav-bar">
 		<a href="#home">Home</a>
 		<a href="#services">Services</a>
 	</div>
-	<div class="main-content">
-		<h2>Homepage</h2>
-		<p>Welcome to Feedbacker!</p>
-		
-		<a href="survey.html" class="survey-button">Take a Survey</a>
-		
+	<div class="content-container">
+		<div class="main-content">
+			<h2>Homepage</h2>
+			<p>Welcome to Feedbacker!</p>
+			<a href="survey.html" class="survey-button">Take a Survey</a>
+		</div>
+		<div class="survey-responses">
+			<h3>Survey Responses</h3>
+			<ul id="surveyResponseList">
+				<!-- Survey responses will be populated here -->
+			</ul>
+		</div>
 	</div>
 </body>
 </html>

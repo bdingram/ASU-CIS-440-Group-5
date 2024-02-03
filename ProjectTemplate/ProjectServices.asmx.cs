@@ -8,6 +8,7 @@ using MySql.Data.MySqlClient;
 using System.Data;
 using Org.BouncyCastle.Crypto.Generators;
 using BCrypt.Net;
+using System.Web.Script.Services;
 
 
 namespace ProjectTemplate
@@ -67,6 +68,19 @@ namespace ProjectTemplate
             }
         }
 
+        public class SurveyResponse
+        {
+            public string Category { get; set; }
+            public string Response { get; set; }
+        }
+
+
+        /// <summary>
+        /// Logs in a user
+        /// </summary>
+        /// <param name="uid"></param>
+        /// <param name="pass"></param>
+        /// <returns>bool</returns>
         [WebMethod(EnableSession = true)]
         public bool LogOn(string uid, string pass)
         {
@@ -100,7 +114,7 @@ namespace ProjectTemplate
 
         // New method to handle survey submission
         [WebMethod(EnableSession = true)]
-        public string SubmitSurvey(Dictionary<string, string> responses)
+        public string SubmitSurvey(List<SurveyResponse> responses)
         {
             try
             {
@@ -111,8 +125,8 @@ namespace ProjectTemplate
                     {
                         string query = "INSERT INTO survey_responses (category, response) VALUES (@category, @response)";
                         MySqlCommand cmd = new MySqlCommand(query, con);
-                        cmd.Parameters.AddWithValue("@category", response.Key);
-                        cmd.Parameters.AddWithValue("@response", response.Value);
+                        cmd.Parameters.AddWithValue("@category", response.Category);
+                        cmd.Parameters.AddWithValue("@response", response.Response);
                         cmd.ExecuteNonQuery();
                     }
                     con.Close();
@@ -126,7 +140,51 @@ namespace ProjectTemplate
         }
 
 
+
+        /// <summary>
+        /// Displays a list of survey responses
+        /// </summary>
+        /// <returns>a list of survey responses</returns>
+        [WebMethod(EnableSession = true)]
+        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+        public List<SurveyResponse> GetSurveyResponses()
+        {
+            List<SurveyResponse> surveyResponses = new List<SurveyResponse>();
+
+            try
+            {
+                using (MySqlConnection con = new MySqlConnection(getConString()))
+                {
+                    con.Open();
+                    string query = "SELECT category, response FROM survey_responses";
+                    MySqlCommand cmd = new MySqlCommand(query, con);
+
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            SurveyResponse response = new SurveyResponse
+                            {
+                                Category = reader["category"].ToString(),
+                                Response = reader["response"].ToString()
+                            };
+                            surveyResponses.Add(response);
+                        }
+                    }
+                    con.Close();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error in GetSurveyResponses: " + e.Message);
+                // Depending on your error handling strategy, you might want to rethrow the exception,
+                // return a custom error message, etc.
+            }
+
+            return surveyResponses;
+        }
+
     }
 
-    
+
 }

@@ -2,37 +2,184 @@
 <html>
 <head>
 	<title>Feedbacker</title>
+
 	<!-- Include jQuery -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 	<script>
-
-		$(document).ready(function () {
+        $(document).ready(function () {
             var webMethod = "ProjectServices.asmx/GetSurveyResponses";
-			var parameters = "{}";
 
-			$.ajax({
-				type: "GET",
-				url: webMethod,
-				data: parameters,
-				dataType: "json",
-				success: function (data) {
-					console.log("Response data:", data);
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                dataType: "xml",
+                success: function (xmlResponse) {
+                    console.log("AJAX call successful.");
+                    console.log("Response:", new XMLSerializer().serializeToString(xmlResponse));
 
-					data.forEach(function (response) {
-						var stringifiedResponse = JSON.stringify(response, null, 2);
-                        $('#surveyResponseList').append('<li><pre>' + stringifiedResponse + '</pre></li>');
-					});
-				},
-				error: function (xhr, status, error) {
-					console.log("AJAX Error:", xhr.status, status, error);
-				}
-			});
-		});
+                    var categoriesSet = new Set(); // Use a Set to store unique categories
+                    var responses = []; // Array to hold response values (as numbers)
+
+                    $(xmlResponse).find('SurveyResponse').each(function () {
+                        var category = $(this).find('Category').text();
+                        var response = $(this).find('Response').text();
+
+                        if (category !== "test category") { // Ignore "test category"
+                            // Add the category to the Set (ensures uniqueness)
+                            categoriesSet.add(category);
+
+                            // Update the responses array
+                            responses.push(convertResponseToNumeric(response));
+
+                            var listItem = $('<li>')
+                                .html('Category: <strong>' + category + '</strong>' +
+                                    '<br>Response: <strong>' + response + '</strong>');
+                            $('#surveyResponseList').append(listItem);
+                        }
+                    });
+
+                    // Convert the Set back to an array for chart labels
+                    var categories = Array.from(categoriesSet);
+
+                    // Call the function to create the chart with the processed data
+                    createChart(categories, responses);
+                },
+                error: function (xhr, status, error) {
+                    console.log("AJAX call failed.");
+                    console.log("Status:", status);
+                    console.log("Error:", error);
+                }
+            });
+        });
+
+        var categoryLabels = ['Work Environment', 'Tools and Resources', 'Management'];
+        var responseValues = convertResponseToNumeric(response);
+
+        // Function to create the chart
+        function createChart(categories, responses) {
+            var ctx = document.getElementById('surveyResponseChart').getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        label: "Responses",
+                        data: responses,
+                        backgroundColor: function (context) {
+                            var value = context.dataset.data[context.dataIndex];
+                            // Define colors based on response values
+                            var colors = ['rgba(0, 123, 255, 1)', 'rgba(255, 165, 0, 1)', 'rgba(255, 255, 0, 1)', 'rgba(144, 238, 144, 1)', 'rgba(0, 128, 0, 1)'];
+                            return colors[value - 1]; // Adjust for 0-based index
+                        },
+                        borderColor: 'rgba(0, 0, 0, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Response'
+                            },
+                            ticks: {
+                                callback: function (value) {
+                                    // Convert numeric values to worded versions
+                                    var wordedValues = {
+                                        1: 'Strongly disagree',
+                                        2: 'Disagree',
+                                        3: 'Neutral',
+                                        4: 'Agree',
+                                        5: 'Strongly agree'
+                                    };
+                                    return wordedValues[value] || ''; // Return empty string for .5 values
+                                },
+                                stepSize: 1 // Set the step size to 1 to remove .5 interval values
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Adjust the canvas size to make the chart larger
+            ctx.canvas.width = 800; // Set your desired width
+            ctx.canvas.height = 400; // Set your desired height
+        }
 
 
 
+
+
+
+        function convertResponseToNumeric(response) {
+            var valueMap = {
+                'Strongly agree': 5,
+                'Agree': 4,
+                'Neutral': 3,
+                'Disagree': 2,
+                'Strongly disagree': 1
+            };
+            return valueMap[response] || 0; // Default to 0 if response is not recognized
+		}
+
+        
+
+        // Call this function to render the chart after you've received and processed the data
+        function renderChart(labels, data) {
+            var ctx = document.getElementById('surveyResponseChart').getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'bar', // The type of chart to create
+                data: {
+                    labels: categoryLabels, // Categories for the chart
+                    datasets: [{
+                        label: 'Survey Responses',
+                        data: responses, // Your response values go here
+                        backgroundColor: function (context) {
+                            var value = context.dataset.data[context.dataIndex];
+                            // Define colors based on response values
+                            var colors = ['red', 'orange', 'yellow', 'lightgreen', 'green'];
+                            return colors[value - 1]; // Adjust for 0-based index
+                        },
+                        borderColor: 'rgba(0, 0, 0, 1)',
+                        borderWidth: 1
+                    }]
+
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Response'
+                            },
+                            ticks: {
+                                callback: function (value, index, values) {
+                                    // Convert numeric values to worded versions
+                                    var wordedValues = {
+                                        1: 'Strongly disagree',
+                                        2: 'Disagree',
+                                        3: 'Neutral',
+                                        4: 'Agree',
+                                        5: 'Strongly agree'
+                                    };
+                                    return wordedValues[value] || value;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Call the function with your data
+        renderChart(categoryLabels, responseValues);
+        
 	</script>
+
 	<style>
 		body {
 			font-family: Arial, sans-serif;
@@ -71,6 +218,7 @@
 		.content-container {
 			display: flex;
 			margin: 15px;
+			flex-wrap: wrap; /* Allow content to wrap to the next line */
 		}
 
 		.main-content {
@@ -79,16 +227,46 @@
 			background-color: white;
 			border-radius: 5px;
 			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+			margin-right: 20px; /* Add margin to separate main content and survey responses */
 		}
 
 		.survey-responses {
-			width: 70%;
-			padding: 15px;
+			flex: 1; /* Take up the full width of its container */
 			background-color: white;
 			border-radius: 5px;
 			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-			margin-left: 20px;
+			max-height: 400px;
+			overflow-y: auto;
+			position: relative;
+			margin-right: 20px; /* Add margin to separate survey responses and chart */
 		}
+
+		.survey-responses-header {
+			width: 100%;
+			background-color: white;
+			padding: 15px;
+			border-bottom: 1px solid #ddd;
+			position: sticky;
+			top: 0;
+			z-index: 10;
+		}
+
+		#surveyResponseList {
+			list-style-type: none;
+			padding: 0;
+			margin: 0;
+		}
+
+			#surveyResponseList li {
+				padding: 10px;
+				border-bottom: 1px solid #ddd;
+				background: white;
+				box-sizing: border-box;
+			}
+
+				#surveyResponseList li:last-child {
+					border-bottom: none;
+				}
 
 		.logout-button {
 			background-color: slategrey;
@@ -124,6 +302,26 @@
 			.survey-button:hover {
 				background-color: #66bb6a;
 			}
+
+        .chart-container {
+            width: 48%; 
+            height: 300px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            float: right;
+        }
+
+
+
+		canvas {
+			max-width: 100%;
+		}
+
+		.bold-text {
+			font-weight: bold;
+		}
 	</style>
 
 
@@ -144,11 +342,19 @@
 			<a href="survey.html" class="survey-button">Take a Survey</a>
 		</div>
 		<div class="survey-responses">
-			<h3>Survey Responses</h3>
-			<ul id="surveyResponseList">
-				<!-- Survey responses will be populated here -->
-			</ul>
+			<div class="survey-responses-header">
+				<h3>Survey Responses</h3>
+			</div>
+			<div class="survey-responses-list">
+				<ul id="surveyResponseList">
+					<!-- Survey responses will be populated here -->
+				</ul>
+			</div>
 		</div>
+	</div>
+
+	<div class="chart-container">
+		<canvas id="surveyResponseChart"></canvas>
 	</div>
 </body>
 </html>

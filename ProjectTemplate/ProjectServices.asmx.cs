@@ -146,7 +146,7 @@ namespace ProjectTemplate
         /// </summary>
         /// <returns>a list of survey responses</returns>
         [WebMethod(EnableSession = true)]
-        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+        [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
         public List<SurveyResponse> GetSurveyResponses()
         {
             List<SurveyResponse> surveyResponses = new List<SurveyResponse>();

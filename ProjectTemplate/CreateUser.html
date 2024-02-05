@@ -8,15 +8,18 @@
 
 	<!--YOUR OWN JAVASCRIPT CAN GO RIGHT HERE-->
 	<script type="text/javascript">
-		function TestButtonHandler() {
-			var webMethod = "ProjectServices.asmx/TestConnection";
-			var parameters = "{}";
+
+		function RegisterNewUser() {
+			var webMethod = "ProjectServices.asmx/RegisterNewUser";
+			var userNameValue = $('#username').val();
+			var passwordValue = $('#password').val();
 
 			//jQuery ajax method
 			$.ajax({
+
 				type: "POST",
 				url: webMethod,
-				data: parameters,
+				data: "{ \"username\" : \"" + userNameValue + "\", \"password\" : " + passwordValue + " }",
 				contentType: "application/json; charset=utf-8",
 				dataType: "json",
 				success: function (msg) {
@@ -28,20 +31,45 @@
 				}
 			});
 		}
-
-
 	</script>
-	<!--END OF YOUR OWN JAVASCRIPT-->
 
+	<!--END OF YOUR OWN JAVASCRIPT-->
 	<!--AND YOUR OWN CSS CAN GO HERE AS WELL-->
 	<style>
+		input[type=text], input[type=password] {
+			width: 450px;
+			padding: 12px 20px;
+			margin: 8px 0;
+			display: inline-block;
+			border: 1px solid #ccc;
+			box-sizing: border-box;
+		}
 
+		button {
+			background-color: #04AA6D;
+			color: white;
+			padding: 14px 20px;
+			margin: 8px 0;
+			border: none;
+			cursor: pointer;
+			width: 450px;
+		}
 
+			button:hover {
+				opacity: 0.8;
+			}
 	</style>
 	<!--END OF YOUR OWN CSS-->
-</head >
+</head>
 <body>
-	
-	<h2> Create User </h2>
+	<label for="uname"><b>Username    </b></label>
+	<br>
+	<input class="textbox2" placeholder="Enter Username" type="text" id="username" />
+	<br>
+	<label for="psw"><b>Password   </b></label>
+	<br>
+	<input class="textbox2" placeholder="Enter Password" type="password" id="password" />
+	<br>
+	<button onclick="javascript: RegisterNewUser();">Register</button>
 </body>
-</html >
+</html>

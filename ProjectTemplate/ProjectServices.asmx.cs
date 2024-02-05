@@ -183,6 +183,121 @@ namespace ProjectTemplate
 
             return surveyResponses;
         }
+        private void DropTable(MySqlConnection con)
+        {
+            //string testQuery = "CREATE TABLE IF NOT EXISTS users (username VARCHAR(10), password VARCHAR(10))";
+            string testQuery = "drop table if exists registeredUsers;";
+            try
+            {
+
+                MySqlCommand cmd = new MySqlCommand(testQuery, con);
+
+                MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
+                DataTable table = new DataTable();
+                adapter.Fill(table);
+
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Unable to create User table !");
+            }
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+        ///Helper method to create users table if not exists
+        ////////////////////////////////////////////////////////////////////////
+        private void CreateUsersTable(MySqlConnection con)
+        {
+            //string testQuery = "CREATE TABLE IF NOT EXISTS users (username VARCHAR(10), password VARCHAR(10))";
+            string testQuery = "Create table if not exists registeredUsers(username varchar(10) NOT NULL UNIQUE, password varchar(10));";
+            try
+            {
+
+                MySqlCommand cmd = new MySqlCommand(testQuery, con);
+
+                MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
+                DataTable table = new DataTable();
+                adapter.Fill(table);
+
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Unable to create User table !");
+            }
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+        ///Helper method to check if the user name already exists
+        ////////////////////////////////////////////////////////////////////////
+        private bool CheckIfUserNameAlreadyExists(MySqlConnection con, string username)
+        {
+            string testQuery = "select * from registeredUsers where username = \'" + username + "\';";
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(testQuery, con);
+
+                MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
+                DataTable table = new DataTable();
+                adapter.Fill(table);
+
+                if (table.Rows.Count != 0)
+                {
+                    throw new Exception("User Name already exists !");
+                }
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+        //The method is used to register a new user providing a valid user name and
+        // password, where username should be unique and atleast 6 chars
+        // and password should contain atleast 8 chars.
+        [WebMethod(EnableSession = true)]
+        /////////////////////////////////////////////////////////////////////////
+        public string RegisterNewUser(string username = "", string password = "")
+        {
+            if (username.Length < 6)
+            {
+                return "User name must be atleat length of 6 characters!";
+            }
+
+            if (password.Length < 8)
+            {
+                return "Password must be atleat length of 8 characters!";
+            }
+
+            try
+            {
+                string insertCommand = "INSERT INTO registeredUsers VALUES(\'" + username + "\', \'" + password + "\');";
+
+                ////////////////////////////////////////////////////////////////////////
+                ///here's an example of using the getConString method!
+                ////////////////////////////////////////////////////////////////////////
+                MySqlConnection con = new MySqlConnection(getConString());
+                ////////////////////////////////////////////////////////////////////////
+
+                //CreateUsersTable(con);
+
+                if (CheckIfUserNameAlreadyExists(con, username))
+                {
+                    MySqlCommand cmd = new MySqlCommand(insertCommand, con);
+                    MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
+                    DataTable table = new DataTable();
+                    adapter.Fill(table);
+                }
+
+                return "User registered successfully!";
+            }
+            catch (Exception e)
+            {
+                return e.Message;
+            }
+        }
 
     }
 

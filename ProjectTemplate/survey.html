@@ -144,54 +144,53 @@
 			}
 		}
 
-		function submitSurvey() {
-			var surveyResponses = {};
-			$("#surveyForm input[type='radio']:checked").each(function () {
-				var name = $(this).attr("name");
-				var value = $(this).val();
-				surveyResponses[name] = value;
-			});
+        function submitSurvey() {
+            var surveyResponses = {};
+            $("#surveyForm input[type='radio']:checked").each(function () {
+                var category = $(this).attr("name");
+                var response = $(this).val();
+                surveyResponses[category] = response;
+            });
 
-			var webMethod = "ProjectServices.asmx/SubmitSurvey";
-			var parameters = "{\"responses\":" + JSON.stringify(surveyResponses) + "}";
+            var webMethod = "ProjectServices.asmx/SubmitSurvey";
+            var parameters = JSON.stringify({ 'responses': surveyResponses });
 
-			//jQuery ajax method
-			$.ajax({
-				type: "POST",
-				url: webMethod,
-				data: parameters,
-				contentType: "application/json; charset=utf-8",
-				dataType: "json",
+            // jQuery ajax method
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                data: parameters,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
                 success: function (msg) {
                     $("#surveyForm").hide();
                     $("#confirmationMessage").show();
                     $("#submitSurvey").remove(); // This line removes the Submit button
                 },
                 error: function (e) {
-                    alert("Error submitting the survey.");
+                    alert("Error submitting the survey: " + e.responseText);
                 }
-			});
-		}
+            });
+        }
+
+
+
 	</script>
 </head>
 <body>
-	<body>
-		<div id="surveyContainer">
-			<h2>Employee Feedback Survey</h2>
-			<form id="surveyForm">
-				<!-- Questions will be inserted here by JavaScript -->
-			</form>
-			<button id="submitSurvey">Submit</button>
-			<!-- Exit Survey button -->
-			<a href="home.html" style="text-decoration: none;">
-				<button id="exitSurvey">Exit Survey</button>
-			</a>
-			<div id="confirmationMessage" style="display:none;">
-				Thank you for your feedback!
-			</div>
+	<div id="surveyContainer">
+		<h2>Employee Feedback Survey</h2>
+		<form id="surveyForm">
+			<!-- Questions will be inserted here by JavaScript -->
+		</form>
+		<button id="submitSurvey">Submit</button>
+		<!-- Exit Survey button -->
+		<a href="home.html" style="text-decoration: none;">
+			<button id="exitSurvey">Exit Survey</button>
+		</a>
+		<div id="confirmationMessage" style="display:none;">
+			Thank you for your feedback!
 		</div>
-	</body>
-
-
+	</div>
 </body>
 </html>

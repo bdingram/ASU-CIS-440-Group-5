@@ -114,19 +114,19 @@ namespace ProjectTemplate
 
         // New method to handle survey submission
         [WebMethod(EnableSession = true)]
-        public string SubmitSurvey(List<SurveyResponse> responses)
+        public string SubmitSurvey(Dictionary<string, string> responses)
         {
             try
             {
                 using (MySqlConnection con = new MySqlConnection(getConString()))
                 {
                     con.Open();
-                    foreach (var response in responses)
+                    foreach (var entry in responses)
                     {
                         string query = "INSERT INTO survey_responses (category, response) VALUES (@category, @response)";
                         MySqlCommand cmd = new MySqlCommand(query, con);
-                        cmd.Parameters.AddWithValue("@category", response.Category);
-                        cmd.Parameters.AddWithValue("@response", response.Response);
+                        cmd.Parameters.AddWithValue("@category", entry.Key);
+                        cmd.Parameters.AddWithValue("@response", entry.Value);
                         cmd.ExecuteNonQuery();
                     }
                     con.Close();
@@ -138,6 +138,8 @@ namespace ProjectTemplate
                 return "Error in SubmitSurvey: " + e.Message;
             }
         }
+
+
 
 
 
@@ -177,8 +179,6 @@ namespace ProjectTemplate
             catch (Exception e)
             {
                 Console.WriteLine("Error in GetSurveyResponses: " + e.Message);
-                // Depending on your error handling strategy, you might want to rethrow the exception,
-                // return a custom error message, etc.
             }
 
             return surveyResponses;

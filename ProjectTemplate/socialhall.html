@@ -7,13 +7,24 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <style>
         body {
-            background-color: #f0f2f5;
-            padding-top: 20px;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e6e6e6;
+        }
+
+        .header {
+            background-color: #4a69bd;
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            position: relative;
         }
 
         .container {
             max-width: 800px;
             margin: auto;
+            padding-bottom: 120px;
         }
 
         .post {
@@ -50,21 +61,92 @@
             right: 20px;
             top: 20px;
         }
+
+        .input-section {
+            position: fixed;
+            bottom: 0;
+            left: 25%;
+            width: 50%;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0px -2px 5px rgba(0,0,0,0.1);
+            z-index: 1000; /* Ensure it stays above other content */
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+
+        .nav-bar {
+            background-color: #60a3bc;
+            overflow: hidden;
+            margin-bottom: 20px; /* Add margin at the bottom */
+        }
+
+            .nav-bar a {
+                float: left;
+                display: block;
+                color: white;
+                text-align: center;
+                padding: 14px 16px;
+                text-decoration: none;
+            }
+
+                .nav-bar a:hover {
+                    background-color: #82ccdd;
+                    color: black;
+                }
+
+        .logout-button {
+            background-color: slategrey;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            border-radius: 5px;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(+140%);
+        }
+
+            .logout-button:hover {
+                background-color: #82ccdd;
+            }
+
     </style>
 </head>
 <body>
-    <div class="username-display"></div>
+    <!-- Header -->
+    <div class="header">
+        <h1>Feedbacker</h1>
+        <div class="username-display"></div>
+        <a href="login.html" class="logout-button">Logout</a>
+    </div>
+
+    <!-- Taskbar for Social Hall -->
+    <div class="nav-bar">
+        <a href="home.html">Home</a>
+        <a href="#socialhall">Social Hall</a> <!-- Adjust this link if necessary -->
+    </div>
+
+    
     <div class="container">
-        <h2>What's on your mind?</h2>
-        <textarea id="postContent" class="form-control" rows="3" placeholder="Share something..."></textarea>
-        <select id="postTag" class="form-control mt-2">
-            <option value="Work Environment">Work Environment</option>
-            <option value="Tools & Resources">Tools & Resources</option>
-            <option value="Management">Management</option>
-        </select>
-        <button id="submitPost" class="btn btn-primary mt-2">Post</button>
+        <!-- Posts Section (Moved to the top) -->
         <div id="postsContainer" class="mt-3">
             <!-- Posts will be dynamically inserted here -->
+        </div>
+
+        <!-- Input Section for New Posts (Moved to the bottom) -->
+        <div class="input-section">
+            <h2>What's on your mind?</h2>
+            <textarea id="postContent" class="form-control" rows="3" placeholder="Share something..."></textarea>
+            <select id="postTag" class="form-control mt-2">
+                <option value="Work Environment">Work Environment</option>
+                <option value="Tools & Resources">Tools & Resources</option>
+                <option value="Management">Management</option>
+            </select>
+            <button id="submitPost" class="btn btn-primary mt-2">Post</button>
         </div>
     </div>
 
@@ -104,13 +186,13 @@
                 $("#postsContainer").empty();
                 $.each(posts, function (index, post) {
                     var postHtml = `<div class="post" id="post-${post.PostId}">
-                                            <div class="post-metadata">${post.Username} posted in <span class="post-tag">${post.Tag}</span></div>
-                                            <div class="post-content">${post.Content}</div>
-                                            <div class="post-actions">
-                                                <button class="btn btn-secondary btn-sm editPost" data-post-id="${post.PostId}">Edit</button>
-                                                <button class="btn btn-danger btn-sm deletePost" data-post-id="${post.PostId}">Delete</button>
-                                            </div>
-                                        </div>`;
+                                                        <div class="post-metadata">${post.Username} posted in <span class="post-tag">${post.Tag}</span></div>
+                                                        <div class="post-content">${post.Content}</div>
+                                                        <div class="post-actions">
+                                                            <button class="btn btn-secondary btn-sm editPost" data-post-id="${post.PostId}">Edit</button>
+                                                            <button class="btn btn-danger btn-sm deletePost" data-post-id="${post.PostId}">Delete</button>
+                                                        </div>
+                                                    </div>`;
                     $("#postsContainer").append(postHtml);
                 });
             }

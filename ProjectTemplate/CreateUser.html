@@ -36,40 +36,85 @@
 	<!--END OF YOUR OWN JAVASCRIPT-->
 	<!--AND YOUR OWN CSS CAN GO HERE AS WELL-->
 	<style>
-		input[type=text], input[type=password] {
-			width: 450px;
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+
+        /* Form Container */
+        .form-container {
+            width: 300px;
+        }
+
+        /* Labels */
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        input[type=text], input[type=password] {
+            /*width: 450px;
 			padding: 12px 20px;
 			margin: 8px 0;
 			display: inline-block;
 			border: 1px solid #ccc;
-			box-sizing: border-box;
-		}
+			box-sizing: border-box;*/
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
 
-		button {
-			background-color: #04AA6D;
+        button {
+            /*background-color: #04AA6D;
 			color: white;
 			padding: 14px 20px;
 			margin: 8px 0;
 			border: none;
 			cursor: pointer;
-			width: 450px;
-		}
+			width: 450px;*/
+            width: 108%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #0d6efd;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
 
-			button:hover {
-				opacity: 0.8;
-			}
+            button:hover {
+                opacity: 0.8;
+                background-color: #0b5ed7;
+            }
 	</style>
 	<!--END OF YOUR OWN CSS-->
 </head>
 <body>
-	<label for="uname"><b>Username    </b></label>
-	<br>
-	<input class="textbox2" placeholder="Enter Username" type="text" id="username" />
-	<br>
-	<label for="psw"><b>Password   </b></label>
-	<br>
-	<input class="textbox2" placeholder="Enter Password" type="password" id="password" />
-	<br>
-	<button onclick="javascript: RegisterNewUser();">Register</button>
+	<div class="form-container">
+		<h2>Register User</h2>
+		<div>
+			<label for="uname"><b>Username    </b></label>
+			<input class="textbox2" placeholder="Enter Username" type="text" id="username" />
+		</div>
+		<div>
+			<label for="psw"><b>Password   </b></label>
+			<input class="textbox2" placeholder="Enter Password" type="password" id="password" />
+		</div>
+		<div>
+			<button onclick="javascript: RegisterNewUser();">Register</button>
+		</div>
+	</div>
 </body>
 </html>

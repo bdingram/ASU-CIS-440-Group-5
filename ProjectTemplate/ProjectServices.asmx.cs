@@ -9,6 +9,10 @@ using System.Data;
 using Org.BouncyCastle.Crypto.Generators;
 using BCrypt.Net;
 using System.Web.Script.Services;
+using System.ComponentModel;
+using System.Web.Http;
+using System.Configuration;
+using System.Data.SqlClient;
 
 
 namespace ProjectTemplate
@@ -68,11 +72,6 @@ namespace ProjectTemplate
             }
         }
 
-        public class SurveyResponse
-        {
-            public string Category { get; set; }
-            public string Response { get; set; }
-        }
 
 
         /// <summary>
@@ -88,7 +87,8 @@ namespace ProjectTemplate
 
             string sqlConnectString = getConString();
 
-            string sqlSelect = "SELECT id FROM users WHERE userid=@idValue and pass=@passValue";
+            // Adjusted to also select the username
+            string sqlSelect = "SELECT id, userid FROM users WHERE userid=@idValue and pass=@passValue";
 
             MySqlConnection sqlConnection = new MySqlConnection(sqlConnectString);
             MySqlCommand sqlCommand = new MySqlCommand(sqlSelect, sqlConnection);
@@ -104,17 +104,242 @@ namespace ProjectTemplate
 
             if (sqlDt.Rows.Count > 0)
             {
+                // Store both the ID and username in the session
                 Session["id"] = sqlDt.Rows[0]["id"];
+                Session["username"] = sqlDt.Rows[0]["userid"]; // Assumes 'username' column exists
                 success = true;
             }
 
             return success;
+        }
+
+
+        /////////////////////// Social Media ////////////////////////////////////
+        /// <summary>
+        [WebMethod(EnableSession = true)]
+        public string GetUsername()
+        {
+            if (Session["username"] != null)
+            {
+                return Session["username"].ToString();
+            }
+            else
+            {
+                return "Not logged in";
+            }
+        }
+
+        /// </summary>
+        public class Post
+        {
+            public int PostId { get; set; }
+            public string Username { get; set; }
+            public string Tag { get; set; }
+            public string Content { get; set; }
+        }
+
+
+        // This could be replaced with actual database logic
+        private static List<Post> posts = new List<Post>();
+
+        public Post FindPostById(int postId)
+        {
+            Post foundPost = null;
+
+            using (var connection = new MySqlConnection(getConString()))
+            {
+                string query = "SELECT idexec_posts, username, post_tag, post_content FROM exec_posts WHERE idexec_posts = @PostId";
+
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@PostId", postId);
+
+                    try
+                    {
+                        connection.Open();
+                        using (var reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                foundPost = new Post()
+                                {
+                                    PostId = Convert.ToInt32(reader["PostId"]),
+                                    Username = reader["Username"].ToString(),
+                                    Tag = reader["Tag"].ToString(),
+                                    Content = reader["Content"].ToString()
+                                };
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log or handle the exception as needed
+                        Console.WriteLine("An error occurred: " + ex.Message);
+                    }
+                }
+            }
+
+            return foundPost;
+        }
+
+        [WebMethod(EnableSession = true)]
+        public string EditPost(int postId, string newContent)
+        {
+            if (Session["username"] == null)
+            {
+                return "User not logged in.";
+            }
+
+            string sessionUsername = Session["username"].ToString();
+            try
+            {
+                using (MySqlConnection connection = new MySqlConnection(getConString()))
+                {
+                    string query = "UPDATE exec_posts SET post_content = @Content WHERE idexec_posts = @PostId AND username = @Username";
+                    MySqlCommand command = new MySqlCommand(query, connection);
+                    command.Parameters.AddWithValue("@Content", newContent);
+                    command.Parameters.AddWithValue("@PostId", postId);
+                    command.Parameters.AddWithValue("@Username", sessionUsername);
+
+                    connection.Open();
+                    int result = command.ExecuteNonQuery();
+
+                    if (result > 0)
+                    {
+                        return "Success";
+                    }
+                    else
+                    {
+                        return "Post not found or user mismatch.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return "Error: " + ex.Message;
+            }
+        }
+
+
+        [WebMethod(EnableSession = true)]
+        public string DeletePost(int postId)
+        {
+            if (Session["username"] == null)
+            {
+                return "User not logged in.";
+            }
+
+            string sessionUsername = Session["username"].ToString();
+            try
+            {
+                using (MySqlConnection connection = new MySqlConnection(getConString()))
+                {
+                    string query = "DELETE FROM exec_posts WHERE idexec_posts = @PostId AND username = @Username";
+                    MySqlCommand command = new MySqlCommand(query, connection);
+                    command.Parameters.AddWithValue("@PostId", postId);
+                    command.Parameters.AddWithValue("@Username", sessionUsername);
+
+                    connection.Open();
+                    int result = command.ExecuteNonQuery();
+
+                    if (result > 0)
+                    {
+                        return "Success";
+                    }
+                    else
+                    {
+                        return "Post not found or user mismatch.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return "Error: " + ex.Message;
+            }
+        }
+
+
+        [WebMethod(EnableSession = true)]
+        public List<Post> GetPosts()
+        {
+            List<Post> posts = new List<Post>();
+
+            using (MySqlConnection conn = new MySqlConnection(getConString()))
+            {
+                conn.Open();
+                string query = "SELECT idexec_posts, username, post_tag, post_content FROM exec_posts";
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                {
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            posts.Add(new Post
+                            {
+                                PostId = Convert.ToInt32(reader["idexec_posts"]),
+                                Username = reader["username"].ToString(),
+                                Tag = reader["post_tag"].ToString(),
+                                Content = reader["post_content"].ToString()
+                            });
+                        }
+                    }
+                }
+            }
+
+            return posts;
+        }
+
+        [WebMethod(EnableSession = true)]
+        public string CreatePost(string tag, string content)
+        {
+            string username = Convert.ToString(Session["Username"]);
+            if (string.IsNullOrEmpty(username))
+            {
+                return "User not logged in.";
+            }
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(getConString()))
+                {
+                    conn.Open();
+                    
+                    string query = "INSERT INTO exec_posts (username, post_tag, post_content) VALUES (@Username, @Tag, @Content)";
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@Username", username);
+                        cmd.Parameters.AddWithValue("@Tag", tag);
+                        cmd.Parameters.AddWithValue("@Content", content);
+
+                        int result = cmd.ExecuteNonQuery();
+                        return result > 0 ? "Success" : "Failure";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log or handle exception
+                return "Error: " + ex.Message;
+            }
+        }
+
+
+        //////////////////////////// End Social Media //////////////////////////////////
+
+        public class SurveyResponse
+        {
+            public string Category { get; set; }
+            public string Response { get; set; }
 
         }
 
+        
+
+
+        
+
         // New method to handle survey submission
         [WebMethod(EnableSession = true)]
-        public string SubmitSurvey(Dictionary<string, string> responses)
+        public string SubmitSurvey(List<SurveyResponse> responses)
         {
             try
             {
@@ -125,8 +350,8 @@ namespace ProjectTemplate
                     {
                         string query = "INSERT INTO survey_responses (category, response) VALUES (@category, @response)";
                         MySqlCommand cmd = new MySqlCommand(query, con);
-                        cmd.Parameters.AddWithValue("@category", entry.Key);
-                        cmd.Parameters.AddWithValue("@response", entry.Value);
+                        cmd.Parameters.AddWithValue("@category", entry.Category);
+                        cmd.Parameters.AddWithValue("@response", entry.Response);
                         cmd.ExecuteNonQuery();
                     }
                     con.Close();
@@ -183,6 +408,7 @@ namespace ProjectTemplate
 
             return surveyResponses;
         }
+
         private void DropTable(MySqlConnection con)
         {
             //string testQuery = "CREATE TABLE IF NOT EXISTS users (username VARCHAR(10), password VARCHAR(10))";

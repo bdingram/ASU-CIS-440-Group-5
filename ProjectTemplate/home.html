@@ -9,6 +9,19 @@
 
 	<script>
         $(document).ready(function () {
+            $.ajax({
+                type: "POST",
+                url: "ProjectServices.asmx/GetUsername",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    $(".username-display").text("Welcome, " + response.d); // Assuming the service returns the username directly
+                },
+                error: function () {
+                    $(".username-display").text("Error fetching username");
+                }
+            });
+
             var webMethod = "ProjectServices.asmx/GetSurveyResponses";
 
             $.ajax({
@@ -177,6 +190,7 @@
 
         // Call the function with your data
         renderChart(categoryLabels, responseValues);
+
         
 	</script>
 
@@ -322,39 +336,46 @@
 		.bold-text {
 			font-weight: bold;
 		}
+        .username-display {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+        }
 	</style>
 
 
 </head>
 <body>
-	<div class="header">
-		<h1>Feedbacker</h1>
-		<a href="login.html" class="logout-button">Logout</a>
-	</div>
-	<div class="nav-bar">
-		<a href="#home">Home</a>
-		<a href="#services">Services</a>
-	</div>
-	<div class="content-container">
-		<div class="main-content">
-			<h2>Homepage</h2>
-			<p>Welcome to Feedbacker!</p>
-			<a href="survey.html" class="survey-button">Take a Survey</a>
-		</div>
-		<div class="survey-responses">
-			<div class="survey-responses-header">
-				<h3>Survey Responses</h3>
-			</div>
-			<div class="survey-responses-list">
-				<ul id="surveyResponseList">
-					<!-- Survey responses will be populated here -->
-				</ul>
-			</div>
-		</div>
-	</div>
+    
+    <div class="header">
+        <h1>Feedbacker</h1>
+        <div class="username-display"></div>
+        <a href="login.html" class="logout-button">Logout</a>
+    </div>
+    <div class="nav-bar">
+        <a href="#home">Home</a>
+        <a href="socialhall.html">Social Hall</a>
+    </div>
+    <div class="content-container">
+        <div class="main-content">
+            <h2>Homepage</h2>
+            <p>Welcome to Feedbacker!</p>
+            <a href="survey.html" class="survey-button">Take a Survey</a>
+        </div>
+        <div class="survey-responses">
+            <div class="survey-responses-header">
+                <h3>Survey Responses</h3>
+            </div>
+            <div class="survey-responses-list">
+                <ul id="surveyResponseList">
+                    <!-- Survey responses will be populated here -->
+                </ul>
+            </div>
+        </div>
+    </div>
 
-	<div class="chart-container">
-		<canvas id="surveyResponseChart"></canvas>
-	</div>
+    <div class="chart-container">
+        <canvas id="surveyResponseChart"></canvas>
+    </div>
 </body>
 </html>

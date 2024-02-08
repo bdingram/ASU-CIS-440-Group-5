@@ -14,17 +14,45 @@
         }
 
         .header {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
             background-color: #4a69bd;
             color: white;
             padding: 30px 0;
             text-align: center;
-            position: relative;
         }
 
+        .nav-bar {
+            position: fixed;
+            width: 100%;
+            top: 115px;
+            z-index: 900;
+            background-color: #60a3bc;
+            overflow: hidden;
+        }
+
+            .nav-bar a {
+                float: left;
+                display: block;
+                color: white;
+                text-align: center;
+                padding: 14px 16px;
+                text-decoration: none;
+            }
+
+                .nav-bar a:hover {
+                    background-color: #82ccdd;
+                    color: black;
+                }
+
+        /* Styles for the rest of the page */
         .container {
             max-width: 800px;
             margin: auto;
-            padding-bottom: 120px;
+            padding-top: 150px; /* Adjust this value to accommodate the fixed header and taskbar */
+            padding-bottom: 120px; /* Added padding to the bottom */
         }
 
         .post {
@@ -63,37 +91,29 @@
         }
 
         .input-section {
+            display: none;
             position: fixed;
-            bottom: 0;
-            left: 25%;
-            width: 50%;
+            bottom: 60px; /* Adjusted from 0 to leave space for the "Make a Post" button */
+            left: 50%;
+            transform: translateX(-50%);
             background-color: #fff;
             padding: 20px;
-            box-shadow: 0px -2px 5px rgba(0,0,0,0.1);
-            z-index: 1000; /* Ensure it stays above other content */
-            border-top-left-radius: 15px;
-            border-top-right-radius: 15px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            border-radius: 15px 15px 15px 15px;
+            width: 90%; /* Adjust width as needed */
+            max-width: 800px; /* Limit width for larger screens */
         }
 
-        .nav-bar {
-            background-color: #60a3bc;
-            overflow: hidden;
-            margin-bottom: 20px; /* Add margin at the bottom */
+        .make-post-button {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            width: 40%;
+            height: 5%;
         }
-
-            .nav-bar a {
-                float: left;
-                display: block;
-                color: white;
-                text-align: center;
-                padding: 14px 16px;
-                text-decoration: none;
-            }
-
-                .nav-bar a:hover {
-                    background-color: #82ccdd;
-                    color: black;
-                }
 
         .logout-button {
             background-color: slategrey;
@@ -108,12 +128,40 @@
             right: 20px;
             top: 50%;
             transform: translateY(+140%);
+            z-index: 1000;
         }
 
             .logout-button:hover {
                 background-color: #82ccdd;
             }
 
+        /* Styles for the upvote and downvote buttons */
+        .upvote.active, .downvote.active {
+            background-color: blue;
+            color: white;
+        }
+
+        .upvote, .downvote {
+            background-color: #ccc;
+            color: #333;
+        }
+
+        .upvote:hover {
+            background-color: cornflowerblue;
+            color: white;
+        }
+        .downvote:hover {
+            background-color: cornflowerblue;
+            color: white;
+        }
+
+            .upvote.active {
+                background-color: blue;
+            }
+
+            .downvote.active {
+                background-color: blue;
+            }
     </style>
 </head>
 <body>
@@ -130,28 +178,36 @@
         <a href="#socialhall">Social Hall</a> <!-- Adjust this link if necessary -->
     </div>
 
-    
+    <!-- "Make a Post" Button -->
+    <button class="btn btn-primary make-post-button">Make a Post</button>
+
+    <!-- Input Section for New Posts -->
+    <div class="input-section">
+        <h2>What's on your mind?</h2>
+        <textarea id="postContent" class="form-control" rows="3" placeholder="Share something..."></textarea>
+        <select id="postTag" class="form-control mt-2">
+            <option value="Work Environment">Work Environment</option>
+            <option value="Tools & Resources">Tools & Resources</option>
+            <option value="Management">Management</option>
+        </select>
+        <button id="submitPost" class="btn btn-primary mt-2">Post</button>
+    </div>
+
+    <!-- Container for Posts -->
     <div class="container">
-        <!-- Posts Section (Moved to the top) -->
+        <!-- Posts Section -->
         <div id="postsContainer" class="mt-3">
             <!-- Posts will be dynamically inserted here -->
-        </div>
-
-        <!-- Input Section for New Posts (Moved to the bottom) -->
-        <div class="input-section">
-            <h2>What's on your mind?</h2>
-            <textarea id="postContent" class="form-control" rows="3" placeholder="Share something..."></textarea>
-            <select id="postTag" class="form-control mt-2">
-                <option value="Work Environment">Work Environment</option>
-                <option value="Tools & Resources">Tools & Resources</option>
-                <option value="Management">Management</option>
-            </select>
-            <button id="submitPost" class="btn btn-primary mt-2">Post</button>
         </div>
     </div>
 
     <script>
         $(document).ready(function () {
+            // Toggle input section visibility when "Make a Post" button is clicked
+            $(".make-post-button").click(function () {
+                $(".input-section").toggle();
+            });
+
             // Fetch and display username
             $.ajax({
                 type: "POST",
@@ -183,16 +239,22 @@
             }
 
             function displayPosts(posts) {
+                // Sort posts by votes in descending order
+                posts.sort((a, b) => b.Votes - a.Votes);
+
                 $("#postsContainer").empty();
                 $.each(posts, function (index, post) {
                     var postHtml = `<div class="post" id="post-${post.PostId}">
-                                                        <div class="post-metadata">${post.Username} posted in <span class="post-tag">${post.Tag}</span></div>
-                                                        <div class="post-content">${post.Content}</div>
-                                                        <div class="post-actions">
-                                                            <button class="btn btn-secondary btn-sm editPost" data-post-id="${post.PostId}">Edit</button>
-                                                            <button class="btn btn-danger btn-sm deletePost" data-post-id="${post.PostId}">Delete</button>
-                                                        </div>
-                                                    </div>`;
+                            <div class="post-metadata">${post.Username} posted in <span class="post-tag">${post.Tag}</span></div>
+                            <div class="post-content">${post.Content}</div>
+                            <div class="post-actions">
+                                <button class="btn btn-sm upvote${post.UserVote === 1 ? ' active' : ''}" data-post-id="${post.PostId}">&#x25B2;</button>
+                                <button class="btn btn-sm downvote${post.UserVote === -1 ? ' active' : ''}" data-post-id="${post.PostId}">&#x25BC;</button>
+                                <span class="post-votes">${post.Votes} votes</span>
+                                <button class="btn btn-secondary btn-sm editPost" data-post-id="${post.PostId}">Edit</button>
+                                <button class="btn btn-danger btn-sm deletePost" data-post-id="${post.PostId}">Delete</button>
+                            </div>
+                        </div>`;
                     $("#postsContainer").append(postHtml);
                 });
             }
@@ -221,6 +283,39 @@
                     }
                 });
             });
+
+            // Function to handle upvoting
+            $('#postsContainer').on('click', '.upvote', function () {
+                var postId = $(this).data('post-id');
+                votePost(postId, 1); // Upvote
+            });
+
+            // Function to handle downvoting
+            $('#postsContainer').on('click', '.downvote', function () {
+                var postId = $(this).data('post-id');
+                votePost(postId, -1); // Downvote
+            });
+
+            // Function to vote a post
+            function votePost(postId, vote) {
+                $.ajax({
+                    type: "POST",
+                    url: "ProjectServices.asmx/VotePost",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({ postId: postId, vote: vote }),
+                    dataType: "json",
+                    success: function (response) {
+                        if (response.d === "Success") {
+                            fetchPosts(); // Refresh the list of posts
+                        } else {
+                            alert("Failed to vote post: " + response.d);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Error voting post: " + error);
+                    }
+                });
+            }
 
             $('#postsContainer').on('click', '.editPost', function () {
                 var postId = $(this).data('post-id');

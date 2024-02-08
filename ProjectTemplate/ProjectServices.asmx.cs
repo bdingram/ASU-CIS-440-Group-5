@@ -136,6 +136,7 @@ namespace ProjectTemplate
             public string Username { get; set; }
             public string Tag { get; set; }
             public string Content { get; set; }
+            public int Votes {  get; set; }
         }
 
 
@@ -264,30 +265,41 @@ namespace ProjectTemplate
         {
             List<Post> posts = new List<Post>();
 
-            using (MySqlConnection conn = new MySqlConnection(getConString()))
+            try
             {
-                conn.Open();
-                string query = "SELECT idexec_posts, username, post_tag, post_content FROM exec_posts";
-                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                using (MySqlConnection conn = new MySqlConnection(getConString()))
                 {
-                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    conn.Open();
+                    string query = "SELECT idexec_posts, username, post_tag, post_content, votes FROM exec_posts ORDER BY votes DESC";
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
-                        while (reader.Read())
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
                         {
-                            posts.Add(new Post
+                            while (reader.Read())
                             {
-                                PostId = Convert.ToInt32(reader["idexec_posts"]),
-                                Username = reader["username"].ToString(),
-                                Tag = reader["post_tag"].ToString(),
-                                Content = reader["post_content"].ToString()
-                            });
+                                posts.Add(new Post
+                                {
+                                    PostId = Convert.ToInt32(reader["idexec_posts"]),
+                                    Username = reader["username"].ToString(),
+                                    Tag = reader["post_tag"].ToString(),
+                                    Content = reader["post_content"].ToString(),
+                                    Votes = Convert.ToInt32(reader["votes"])
+                                });
+                            }
                         }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                // Log or handle the exception appropriately
+                Console.WriteLine("Error fetching posts: " + ex.Message);
+            }
 
             return posts;
         }
+
+
 
         [WebMethod(EnableSession = true)]
         public string CreatePost(string tag, string content)
@@ -321,6 +333,117 @@ namespace ProjectTemplate
                 return "Error: " + ex.Message;
             }
         }
+
+        [WebMethod(EnableSession = true)]
+        public string VotePost(int postId, int vote)
+        {
+            // Check if the user is authenticated
+            if (Session["username"] == null)
+            {
+                return "User not authenticated";
+            }
+
+            // Validate vote value
+            if (vote != -1 && vote != 0 && vote != 1)
+            {
+                return "Invalid vote value";
+            }
+
+            string result = "Success";
+
+            try
+            {
+
+                string username = Session["username"].ToString();
+
+                // Fetch the user's ID using their username
+                int userId = GetUserIdByUsername(username);
+
+                if (userId == -1)
+                {
+                    return "User not found";
+                }
+
+                using (MySqlConnection connection = new MySqlConnection(getConString()))
+                {
+                    connection.Open();
+
+                    // Check if the post exists
+                    string checkPostQuery = "SELECT COUNT(*) FROM exec_posts WHERE idexec_posts = @PostId";
+                    using (MySqlCommand checkPostCommand = new MySqlCommand(checkPostQuery, connection))
+                    {
+                        checkPostCommand.Parameters.Add("@PostId", MySqlDbType.Int32).Value = postId;
+                        int postCount = Convert.ToInt32(checkPostCommand.ExecuteScalar());
+                        if (postCount == 0)
+                        {
+                            return "Post not found";
+                        }
+                    }
+
+                    // Remove any existing vote by the user for this post
+                    string removeVoteQuery = "DELETE FROM post_votes WHERE user_id = @UserId AND post_id = @PostId";
+                    using (MySqlCommand removeVoteCommand = new MySqlCommand(removeVoteQuery, connection))
+                    {
+                        removeVoteCommand.Parameters.Add("@UserId", MySqlDbType.Int32).Value = userId;
+                        removeVoteCommand.Parameters.Add("@PostId", MySqlDbType.Int32).Value = postId;
+                        removeVoteCommand.ExecuteNonQuery();
+                    }
+
+                    // Insert new vote if it's not zero
+                    if (vote != 0)
+                    {
+                        // Record the user's vote
+                        string recordVoteQuery = "INSERT INTO post_votes (user_id, post_id, vote) VALUES (@UserId, @PostId, @Vote)";
+                        using (MySqlCommand recordVoteCommand = new MySqlCommand(recordVoteQuery, connection))
+                        {
+                            recordVoteCommand.Parameters.Add("@UserId", MySqlDbType.Int32).Value = userId;
+                            recordVoteCommand.Parameters.Add("@PostId", MySqlDbType.Int32).Value = postId;
+                            recordVoteCommand.Parameters.Add("@Vote", MySqlDbType.Int32).Value = vote;
+                            recordVoteCommand.ExecuteNonQuery();
+                        }
+                    }
+
+                    // Update the votes for the post
+                    string updateVotesQuery = "UPDATE exec_posts SET votes = (SELECT SUM(vote) FROM post_votes WHERE post_id = @PostId) WHERE idexec_posts = @PostId";
+                    using (MySqlCommand updateVotesCommand = new MySqlCommand(updateVotesQuery, connection))
+                    {
+                        updateVotesCommand.Parameters.Add("@PostId", MySqlDbType.Int32).Value = postId;
+                        updateVotesCommand.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                result = "Error: " + ex.Message;
+            }
+
+            return result;
+        }
+
+
+
+        // Helper method to fetch user ID by username
+        private int GetUserIdByUsername(string username)
+        {
+            int userId = -1;
+            using (MySqlConnection connection = new MySqlConnection(getConString()))
+            {
+                connection.Open();
+                string query = "SELECT id FROM users WHERE userId = @Username";
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Username", username);
+                    object result = command.ExecuteScalar();
+                    if (result != null)
+                    {
+                        userId = Convert.ToInt32(result);
+                    }
+                }
+            }
+            return userId;
+        }
+
+
 
 
         //////////////////////////// End Social Media //////////////////////////////////

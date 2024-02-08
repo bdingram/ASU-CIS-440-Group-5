@@ -113,6 +113,21 @@ namespace ProjectTemplate
             return success;
         }
 
+        [WebMethod(EnableSession = true)]
+        public bool IsUserLoggedIn()
+        {
+            return Session["username"] != null;
+        }
+
+        [WebMethod(EnableSession = true)]
+        public void Logout()
+        {
+            Session["username"] = null; // Clear the specific session variable
+                                        // Or, to remove all session data:
+                                        // Session.Clear();
+            Session.Abandon(); // This will destroy the session altogether
+        }
+
 
         /////////////////////// Social Media ////////////////////////////////////
         /// <summary>
@@ -579,75 +594,84 @@ namespace ProjectTemplate
         ////////////////////////////////////////////////////////////////////////
         private bool CheckIfUserNameAlreadyExists(MySqlConnection con, string username)
         {
-            string testQuery = "select * from registeredUsers where username = \'" + username + "\';";
+            string testQuery = "SELECT * FROM registeredUsers WHERE username = @Username;";
             try
             {
                 MySqlCommand cmd = new MySqlCommand(testQuery, con);
+                // Use parameterized queries to prevent SQL injection
+                cmd.Parameters.AddWithValue("@Username", username);
 
                 MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
                 DataTable table = new DataTable();
                 adapter.Fill(table);
 
-                if (table.Rows.Count != 0)
-                {
-                    throw new Exception("User Name already exists !");
-                }
-
-                return true;
+                // Return true if user exists (found rows), false otherwise
+                return table.Rows.Count > 0;
             }
             catch (Exception e)
             {
-                throw e;
+                // Consider logging the exception details here
+                // Rethrowing exceptions in this manner can be problematic; 
+                // it's generally better to handle exceptions or let them bubble up naturally
+                throw;
             }
         }
+
 
         /////////////////////////////////////////////////////////////////////////
         //The method is used to register a new user providing a valid user name and
         // password, where username should be unique and atleast 6 chars
         // and password should contain atleast 8 chars.
         [WebMethod(EnableSession = true)]
-        /////////////////////////////////////////////////////////////////////////
         public string RegisterNewUser(string username = "", string password = "")
         {
             if (username.Length < 6)
             {
-                return "User name must be atleat length of 6 characters!";
+                return "User name must be at least length of 6 characters!";
             }
 
             if (password.Length < 8)
             {
-                return "Password must be atleat length of 8 characters!";
+                return "Password must be at least length of 8 characters!";
             }
 
             try
             {
-                string insertCommand = "INSERT INTO registeredUsers VALUES(\'" + username + "\', \'" + password + "\');";
-
-                ////////////////////////////////////////////////////////////////////////
-                ///here's an example of using the getConString method!
-                ////////////////////////////////////////////////////////////////////////
-                MySqlConnection con = new MySqlConnection(getConString());
-                ////////////////////////////////////////////////////////////////////////
-
-                //CreateUsersTable(con);
-
-                if (CheckIfUserNameAlreadyExists(con, username))
+                using (MySqlConnection con = new MySqlConnection(getConString()))
                 {
-                    MySqlCommand cmd = new MySqlCommand(insertCommand, con);
-                    MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
-                    DataTable table = new DataTable();
-                    adapter.Fill(table);
-                }
+                    con.Open();
 
-                return "User registered successfully!";
+                    if (CheckIfUserNameAlreadyExists(con, username))
+                    {
+                        return "Username already exists. Please choose a different username.";
+                    }
+
+                    string insertCommand = "INSERT INTO users (userId, pass) VALUES(@Username, @Password);";
+
+                    using (MySqlCommand cmd = new MySqlCommand(insertCommand, con))
+                    {
+                        cmd.Parameters.AddWithValue("@Username", username);
+                        cmd.Parameters.AddWithValue("@Password", password);
+                        int rowsAffected = cmd.ExecuteNonQuery();
+                        if (rowsAffected > 0)
+                        {
+                            // Set session variable after successful registration
+                            Session["username"] = username;
+                            return "User registered successfully!";
+                        }
+                        else
+                        {
+                            return "An error occurred during registration.";
+                        }
+                    }
+                }
             }
             catch (Exception e)
             {
-                return e.Message;
+                return "Error: " + e.Message;
             }
         }
 
+
     }
-
-
 }

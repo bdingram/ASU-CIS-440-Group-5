@@ -9,28 +9,34 @@
 	<!--YOUR OWN JAVASCRIPT CAN GO RIGHT HERE-->
 	<script type="text/javascript">
 
-		function RegisterNewUser() {
-			var webMethod = "ProjectServices.asmx/RegisterNewUser";
-			var userNameValue = $('#username').val();
-			var passwordValue = $('#password').val();
+        function RegisterNewUser() {
+            var webMethod = "ProjectServices.asmx/RegisterNewUser";
+            var userNameValue = $('#username').val();
+            var passwordValue = $('#password').val();
 
-			//jQuery ajax method
-			$.ajax({
+            // Correct JSON data formatting
+            var data = JSON.stringify({ username: userNameValue, password: passwordValue });
 
-				type: "POST",
-				url: webMethod,
-				data: "{ \"username\" : \"" + userNameValue + "\", \"password\" : " + passwordValue + " }",
-				contentType: "application/json; charset=utf-8",
-				dataType: "json",
-				success: function (msg) {
-					var responseFromServer = msg.d;
-					alert(responseFromServer);
-				},
-				error: function (e) {
-					alert("this code will only execute if javascript is unable to access the webservice");
-				}
-			});
-		}
+            // jQuery ajax method
+            $.ajax({
+                type: "POST",
+                url: webMethod,
+                data: data, // Use the correctly formatted data
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    // Adjust how you access the response based on your service configuration
+                    // For .NET 4.0+, you might directly use msg or msg.d based on your configuration
+                    var responseFromServer = msg.d ? msg.d : msg;
+                    alert(responseFromServer);
+                    window.location.href = "home.html";
+                },
+                error: function (e) {
+                    alert("This code will only execute if JavaScript is unable to access the webservice");
+                }
+            });
+        }
+
 	</script>
 
 	<!--END OF YOUR OWN JAVASCRIPT-->

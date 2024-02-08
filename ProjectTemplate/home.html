@@ -1,14 +1,46 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-	<title>Feedbacker</title>
+    <title>Feedbacker</title>
 
-	<!-- Include jQuery -->
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-	<script>
+    <!-- Include jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="text/javascript">
         $(document).ready(function () {
+            $('#logoutButton').click(function () {
+                $.ajax({
+                    type: "POST",
+                    url: "ProjectServices.asmx/Logout",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function () {
+                        // Redirect to login page or home page after logout
+                        window.location.href = 'login.html';
+                    },
+                    error: function () {
+                        alert('Logout failed. Please try again.');
+                    }
+                });
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                type: "POST",
+                url: "ProjectServices.asmx/IsUserLoggedIn",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    var isLoggedIn = msg.d;
+                    if (!isLoggedIn) {
+                        // Redirect to login page if not logged in
+                        window.location.href = "login.html";
+                    }
+                }
+            });
+
             $.ajax({
                 type: "POST",
                 url: "ProjectServices.asmx/GetUsername",
@@ -68,7 +100,7 @@
         });
 
         var categoryLabels = ['Work Environment', 'Tools and Resources', 'Management'];
-        var responseValues = convertResponseToNumeric(response);
+        //var responseValues = convertResponseToNumeric(response);
 
         // Function to create the chart
         function createChart(categories, responses) {
@@ -136,9 +168,9 @@
                 'Strongly disagree': 1
             };
             return valueMap[response] || 0; // Default to 0 if response is not recognized
-		}
+        }
 
-        
+
 
         // Call this function to render the chart after you've received and processed the data
         function renderChart(labels, data) {
@@ -191,134 +223,134 @@
         // Call the function with your data
         renderChart(categoryLabels, responseValues);
 
-        
-	</script>
 
-	<style>
-		body {
-			font-family: Arial, sans-serif;
-			margin: 0;
-			padding: 0;
-			background-color: #e6e6e6;
-		}
+    </script>
 
-		.header {
-			background-color: #4a69bd;
-			color: white;
-			padding: 10px 0;
-			text-align: center;
-			position: relative;
-		}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e6e6e6;
+        }
 
-		.nav-bar {
-			background-color: #60a3bc;
-			overflow: hidden;
-		}
+        .header {
+            background-color: #4a69bd;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+            position: relative;
+        }
 
-			.nav-bar a {
-				float: left;
-				display: block;
-				color: white;
-				text-align: center;
-				padding: 14px 16px;
-				text-decoration: none;
-			}
+        .nav-bar {
+            background-color: #60a3bc;
+            overflow: hidden;
+        }
 
-				.nav-bar a:hover {
-					background-color: #82ccdd;
-					color: black;
-				}
+            .nav-bar a {
+                float: left;
+                display: block;
+                color: white;
+                text-align: center;
+                padding: 14px 16px;
+                text-decoration: none;
+            }
 
-		.content-container {
-			display: flex;
-			margin: 15px;
-			flex-wrap: wrap; /* Allow content to wrap to the next line */
-		}
+                .nav-bar a:hover {
+                    background-color: #82ccdd;
+                    color: black;
+                }
 
-		.main-content {
-			flex: 1;
-			padding: 15px;
-			background-color: white;
-			border-radius: 5px;
-			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-			margin-right: 20px; /* Add margin to separate main content and survey responses */
-		}
+        .content-container {
+            display: flex;
+            margin: 15px;
+            flex-wrap: wrap; /* Allow content to wrap to the next line */
+        }
 
-		.survey-responses {
-			flex: 1; /* Take up the full width of its container */
-			background-color: white;
-			border-radius: 5px;
-			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-			max-height: 400px;
-			overflow-y: auto;
-			position: relative;
-			margin-right: 20px; /* Add margin to separate survey responses and chart */
-		}
+        .main-content {
+            flex: 1;
+            padding: 15px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-right: 20px; /* Add margin to separate main content and survey responses */
+        }
 
-		.survey-responses-header {
-			width: 100%;
-			background-color: white;
-			padding: 15px;
-			border-bottom: 1px solid #ddd;
-			position: sticky;
-			top: 0;
-			z-index: 10;
-		}
+        .survey-responses {
+            flex: 1; /* Take up the full width of its container */
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-height: 400px;
+            overflow-y: auto;
+            position: relative;
+            margin-right: 20px; /* Add margin to separate survey responses and chart */
+        }
 
-		#surveyResponseList {
-			list-style-type: none;
-			padding: 0;
-			margin: 0;
-		}
+        .survey-responses-header {
+            width: 100%;
+            background-color: white;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
 
-			#surveyResponseList li {
-				padding: 10px;
-				border-bottom: 1px solid #ddd;
-				background: white;
-				box-sizing: border-box;
-			}
+        #surveyResponseList {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
 
-				#surveyResponseList li:last-child {
-					border-bottom: none;
-				}
+            #surveyResponseList li {
+                padding: 10px;
+                border-bottom: 1px solid #ddd;
+                background: white;
+                box-sizing: border-box;
+            }
 
-		.logout-button {
-			background-color: slategrey;
-			color: white;
-			padding: 10px 20px;
-			text-align: center;
-			text-decoration: none;
-			display: inline-block;
-			cursor: pointer;
-			border-radius: 5px;
-			position: absolute;
-			right: 20px;
-			top: 50%;
-			transform: translateY(+140%);
-		}
+                #surveyResponseList li:last-child {
+                    border-bottom: none;
+                }
 
-			.logout-button:hover {
-				background-color: #82ccdd;
-			}
+        .logout-button {
+            background-color: slategrey;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            border-radius: 5px;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(+140%);
+        }
 
-		.survey-button {
-			background-color: #4caf50;
-			color: white;
-			padding: 10px 20px;
-			text-align: center;
-			text-decoration: none;
-			display: inline-block;
-			cursor: pointer;
-			border-radius: 5px;
-			margin-top: 20px;
-		}
+            .logout-button:hover {
+                background-color: #82ccdd;
+            }
 
-			.survey-button:hover {
-				background-color: #66bb6a;
-			}
+        .survey-button {
+            background-color: #4caf50;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+            .survey-button:hover {
+                background-color: #66bb6a;
+            }
 
         .chart-container {
-            width: 48%; 
+            width: 48%;
             height: 300px;
             padding: 15px;
             background-color: white;
@@ -329,19 +361,20 @@
 
 
 
-		canvas {
-			max-width: 100%;
-		}
+        canvas {
+            max-width: 100%;
+        }
 
-		.bold-text {
-			font-weight: bold;
-		}
+        .bold-text {
+            font-weight: bold;
+        }
+
         .username-display {
             position: absolute;
             right: 20px;
             top: 20px;
         }
-	</style>
+    </style>
 
 
 </head>
@@ -350,7 +383,7 @@
     <div class="header">
         <h1>Feedbacker</h1>
         <div class="username-display"></div>
-        <a href="login.html" class="logout-button">Logout</a>
+        <button class="logout-button" id="logoutButton">Logout</button>
     </div>
     <div class="nav-bar">
         <a href="#home">Home</a>

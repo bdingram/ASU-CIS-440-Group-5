@@ -332,11 +332,6 @@ namespace ProjectTemplate
 
         }
 
-        
-
-
-        
-
         // New method to handle survey submission
         [WebMethod(EnableSession = true)]
         public string SubmitSurvey(List<SurveyResponse> responses)
@@ -346,26 +341,30 @@ namespace ProjectTemplate
                 using (MySqlConnection con = new MySqlConnection(getConString()))
                 {
                     con.Open();
+                    
                     foreach (var entry in responses)
                     {
                         string query = "INSERT INTO survey_responses (category, response) VALUES (@category, @response)";
                         MySqlCommand cmd = new MySqlCommand(query, con);
+
+                        // Use dictionary key-value pair to set parameters
                         cmd.Parameters.AddWithValue("@category", entry.Category);
                         cmd.Parameters.AddWithValue("@response", entry.Response);
+
                         cmd.ExecuteNonQuery();
                     }
+
                     con.Close();
+                    return "Survey responses recorded successfully.";
                 }
-                return "Survey responses recorded successfully.";
             }
             catch (Exception e)
             {
+                // Log the exception for troubleshooting
+                Console.WriteLine("Error in SubmitSurvey: " + e.ToString());
                 return "Error in SubmitSurvey: " + e.Message;
             }
         }
-
-
-
 
 
         /// <summary>

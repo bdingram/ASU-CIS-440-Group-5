@@ -145,17 +145,25 @@
 		}
 
         function submitSurvey() {
-            var surveyResponses = {};
+            var surveyResponses = [];
+
             $("#surveyForm input[type='radio']:checked").each(function () {
                 var category = $(this).attr("name");
                 var response = $(this).val();
-                surveyResponses[category] = response;
+
+                var surveyResponse = {
+                    category: category,
+                    response: response
+                };
+
+                surveyResponses.push(surveyResponse);
             });
 
             var webMethod = "ProjectServices.asmx/SubmitSurvey";
             var parameters = JSON.stringify({ 'responses': surveyResponses });
 
-            // jQuery ajax method
+            console.log("Sending data to server:", parameters); // Log data being sent to server
+
             $.ajax({
                 type: "POST",
                 url: webMethod,
@@ -163,15 +171,19 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function (msg) {
+                    console.log("Server response:", msg); // Log server response
                     $("#surveyForm").hide();
                     $("#confirmationMessage").show();
-                    $("#submitSurvey").remove(); // This line removes the Submit button
+                    $("#submitSurvey").remove();
                 },
                 error: function (e) {
+                    console.error("Error submitting the survey:", e.responseText); // Log error message
                     alert("Error submitting the survey: " + e.responseText);
                 }
             });
         }
+
+
 
 
 

@@ -276,6 +276,7 @@ namespace ProjectTemplate
 
 
         [WebMethod(EnableSession = true)]
+        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
        public List<Post> GetPosts(string category = null)
 {
     List<Post> posts = new List<Post>();

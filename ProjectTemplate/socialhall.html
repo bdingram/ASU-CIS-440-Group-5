@@ -244,26 +244,23 @@
                     type: "POST",
                     url: "ProjectServices.asmx/GetPosts",
                     contentType: "application/json; charset=utf-8",
-                    data: category === "All" ? "{}" : JSON.stringify({ category: category }),
+                    data: JSON.stringify({ category: category }),
                     dataType: "json",
                     success: function (response) {
+                         // Clear the posts container first to ensure it's empty before adding new content.
                         $("#postsContainer").empty();
-                        if (response.d.length) {
-                            $.each(response.d, function (index, post) {
-                                if (category === "All" || post.Tag === category) {
-                                    var postHtml = `<div class="post">
-                                        <div class="post-metadata">${post.Username} posted in <span class="post-tag">${post.Tag}</span></div>
-                                        <div class="post-content">${post.Content}</div>
-                                    </div>`;
-                                    $("#postsContainer").append(postHtml);
-                                }
-                            });
-                        } else {
-                            $("#postsContainer").html('<p>No posts available for selected category.</p>');
+
+                        // Check if there are any posts returned from the server.
+                         if (response.d.length > 0) {
+                             // If there are posts, display them.
+                             displayPosts(response.d);
+                         } else {
+                            // If there are no posts, show a "no posts available" message.
+                            $("#postsContainer").html('<p>No posts available for the selected category.</p>');
                         }
                     },
-                    error: function () {
-                        alert("Failed to fetch posts.");
+                    error: function (xhr, status, error) {
+                        console.error("Error fetching posts: ", error);
                     }
                 });
             }

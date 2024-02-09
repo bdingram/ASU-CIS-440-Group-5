@@ -276,43 +276,59 @@ namespace ProjectTemplate
 
 
         [WebMethod(EnableSession = true)]
-        public List<Post> GetPosts()
-        {
-            List<Post> posts = new List<Post>();
+        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+       public List<Post> GetPosts(string category = null)
+{
+    List<Post> posts = new List<Post>();
 
-            try
+    try
+    {
+        using (MySqlConnection conn = new MySqlConnection(getConString()))
+        {
+            conn.Open();
+            string query = "SELECT idexec_posts, username, post_tag, post_content, votes FROM exec_posts";
+            
+            // Add a WHERE clause if a specific category is requested
+            if (!string.IsNullOrEmpty(category) && category != "All")
             {
-                using (MySqlConnection conn = new MySqlConnection(getConString()))
+                query += " WHERE post_tag = @Category";
+            }
+
+            query += " ORDER BY votes DESC";
+
+            using (MySqlCommand cmd = new MySqlCommand(query, conn))
+            {
+                // Add the category parameter if filtering by category
+                if (!string.IsNullOrEmpty(category) && category != "All")
                 {
-                    conn.Open();
-                    string query = "SELECT idexec_posts, username, post_tag, post_content, votes FROM exec_posts ORDER BY votes DESC";
-                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    cmd.Parameters.AddWithValue("@Category", category);
+                }
+
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
                     {
-                        using (MySqlDataReader reader = cmd.ExecuteReader())
+                        posts.Add(new Post
                         {
-                            while (reader.Read())
-                            {
-                                posts.Add(new Post
-                                {
-                                    PostId = Convert.ToInt32(reader["idexec_posts"]),
-                                    Username = reader["username"].ToString(),
-                                    Tag = reader["post_tag"].ToString(),
-                                    Content = reader["post_content"].ToString(),
-                                    Votes = Convert.ToInt32(reader["votes"])
-                                });
-                            }
-                        }
+                            PostId = Convert.ToInt32(reader["idexec_posts"]),
+                            Username = reader["username"].ToString(),
+                            Tag = reader["post_tag"].ToString(),
+                            Content = reader["post_content"].ToString(),
+                            Votes = Convert.ToInt32(reader["votes"])
+                        });
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                // Log or handle the exception appropriately
-                Console.WriteLine("Error fetching posts: " + ex.Message);
-            }
-
-            return posts;
         }
+    }
+    catch (Exception ex)
+    {
+        // Log or handle the exception appropriately
+        Console.WriteLine("Error fetching posts: " + ex.Message);
+    }
+
+    return posts;
+}
 
 
 

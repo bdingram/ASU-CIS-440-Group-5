@@ -181,25 +181,36 @@
     <!-- "Make a Post" Button -->
     <button class="btn btn-primary make-post-button">Make a Post</button>
 
-    <!-- Input Section for New Posts -->
-    <div class="input-section">
-        <h2>What's on your mind?</h2>
-        <textarea id="postContent" class="form-control" rows="3" placeholder="Share something..."></textarea>
-        <select id="postTag" class="form-control mt-2">
-            <option value="Work Environment">Work Environment</option>
-            <option value="Tools & Resources">Tools & Resources</option>
-            <option value="Management">Management</option>
-        </select>
-        <button id="submitPost" class="btn btn-primary mt-2">Post</button>
-    </div>
-
-    <!-- Container for Posts -->
+     <!-- Container for Posts -->
     <div class="container">
+     <!-- Filter Dropdown Here -->
+        <div class="filter-section" style="padding-top: 20px; text-align: center;">
+            <label for="categoryFilter">Filter by Category:</label>
+            <select id="categoryFilter" class="form-control" style="width: auto; display: inline-block; margin-bottom: 20px;">
+                <option value="All">All Categories</option>
+                <option value="Work Environment">Work Environment</option>
+                <option value="Tools & Resources">Tools & Resources</option>
+                <option value="Management">Management</option>
+            </select>
+        </div>
+
+    <!-- Input Section for New Posts -->
+        <div class="input-section">
+            <h2>What's on your mind?</h2>
+            <textarea id="postContent" class="form-control" rows="3" placeholder="Share something..."></textarea>
+            <select id="postTag" class="form-control mt-2">
+                <option value="Work Environment">Work Environment</option>
+                <option value="Tools & Resources">Tools & Resources</option>
+                <option value="Management">Management</option>
+            </select>
+            <button id="submitPost" class="btn btn-primary mt-2">Post</button>
+        </div>
         <!-- Posts Section -->
         <div id="postsContainer" class="mt-3">
             <!-- Posts will be dynamically inserted here -->
         </div>
     </div>
+
 
     <script>
         $(document).ready(function () {
@@ -207,6 +218,7 @@
             $(".make-post-button").click(function () {
                 $(".input-section").toggle();
             });
+
 
             // Fetch and display username
             $.ajax({
@@ -222,18 +234,36 @@
                 }
             });
 
-            function fetchPosts() {
+            $("#categoryFilter").change(function() {
+                var selectedCategory = $(this).val();
+                fetchPosts(selectedCategory);
+            });
+
+            function fetchPosts(category = "All") {
                 $.ajax({
                     type: "POST",
                     url: "ProjectServices.asmx/GetPosts",
                     contentType: "application/json; charset=utf-8",
-                    data: "{}",
+                    data: category === "All" ? "{}" : JSON.stringify({ category: category }),
                     dataType: "json",
                     success: function (response) {
-                        displayPosts(response.d);
+                        $("#postsContainer").empty();
+                        if (response.d.length) {
+                            $.each(response.d, function (index, post) {
+                                if (category === "All" || post.Tag === category) {
+                                    var postHtml = `<div class="post">
+                                        <div class="post-metadata">${post.Username} posted in <span class="post-tag">${post.Tag}</span></div>
+                                        <div class="post-content">${post.Content}</div>
+                                    </div>`;
+                                    $("#postsContainer").append(postHtml);
+                                }
+                            });
+                        } else {
+                            $("#postsContainer").html('<p>No posts available for selected category.</p>');
+                        }
                     },
-                    error: function (xhr, status, error) {
-                        console.error("Error fetching posts: ", error);
+                    error: function () {
+                        alert("Failed to fetch posts.");
                     }
                 });
             }

@@ -594,7 +594,7 @@ namespace ProjectTemplate
         ////////////////////////////////////////////////////////////////////////
         private bool CheckIfUserNameAlreadyExists(MySqlConnection con, string username)
         {
-            string testQuery = "SELECT * FROM registeredUsers WHERE username = @Username;";
+            string testQuery = "SELECT * FROM users WHERE userId = @Username;";
             try
             {
                 MySqlCommand cmd = new MySqlCommand(testQuery, con);

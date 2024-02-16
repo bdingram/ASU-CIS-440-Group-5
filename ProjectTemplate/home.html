@@ -154,6 +154,23 @@
             ctx.canvas.height = 400; // Set your desired height
         }
 
+
+                //TEST FOR BADGE/// COMMENT OUT checkForNewPosts before testing
+            
+              $(document).ready(function() {
+             // Manually show the badge with a static number
+                $("#newPostsBadge").text("5").show();
+
+                // Example of hiding the badge on clicking the Social Hall link
+                $("#socialHallLink").click(function() {
+                    $("#newPostsBadge").hide();
+                });
+            });     
+
+
+
+
+
         // checks for new posts
         function checkForNewPosts() {
         $.ajax({
@@ -177,6 +194,11 @@
         // Poll for new posts every 30 sec
         setInterval(checkForNewPosts, 30000);
         
+        // Ensure this is called on document ready to immediately check for new posts
+        $(document).ready(function () {
+            checkForNewPosts();
+        });
+        
 
         $("#socialHallLink").click(function() {
         // Hide the badge and update the last_checked timestamp
@@ -195,6 +217,11 @@
             }
         });
         });
+
+
+
+      
+    
 
 
 
@@ -417,7 +444,7 @@
         }
 
         #newPostsBadge {
-            display: inline-block;
+            display: none;
             background-color: red;
             border-radius: 50%; /* Makes the badge circular */
             color: white;
@@ -452,7 +479,7 @@
     <div class="nav-bar">
         <a href="#home">Home</a>
         <a href="socialhall.html" id="socialHallLink">Social Hall <span id="newPostsBadge" 
-        style="display: none"></span> </a>
+      ></span> </a>
     </div>
     <div class="content-container">
         <div class="main-content">
@@ -475,5 +502,8 @@
     <div class="chart-container">
         <canvas id="surveyResponseChart"></canvas>
     </div>
+
+    
+
 </body>
 </html>

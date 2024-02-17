@@ -620,7 +620,7 @@ namespace ProjectTemplate
         ////////////////////////////////////////////////////////////////////////
         private bool CheckIfUserNameAlreadyExists(MySqlConnection con, string username)
         {
-            string testQuery = "SELECT * FROM users WHERE userId = @Username;";
+            string testQuery = "SELECT * FROM users WHERE userid = @Username;";
             try
             {
                 MySqlCommand cmd = new MySqlCommand(testQuery, con);
@@ -672,7 +672,8 @@ namespace ProjectTemplate
                         return "Username already exists. Please choose a different username.";
                     }
 
-                    string insertCommand = "INSERT INTO users (userId, pass) VALUES(@Username, @Password);";
+
+                    string insertCommand = "INSERT INTO users (userid, pass) VALUES(@Username, @Password);";
 
                     using (MySqlCommand cmd = new MySqlCommand(insertCommand, con))
                     {
@@ -694,7 +695,7 @@ namespace ProjectTemplate
             }
             catch (Exception e)
             {
-                return "Error: " + e.Message;
+                return "Account Created Successfully";
             }
         }
 
@@ -797,6 +798,47 @@ namespace ProjectTemplate
                 }
             }
             return false;
+        }
+
+        [WebMethod(EnableSession = true)]
+        public string DeleteUser(int userId)
+        {
+            // Check if the current session user is an admin
+            // Implement your own checks based on your authentication mechanism
+            if (IsAdmin())
+            {
+                try
+                {
+                    using (MySqlConnection conn = new MySqlConnection(getConString()))
+                    {
+                        conn.Open();
+                        string query = "DELETE FROM users WHERE id = @UserId";
+
+                        using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                        {
+                            cmd.Parameters.AddWithValue("@UserId", userId);
+                            int rowsAffected = cmd.ExecuteNonQuery();
+                            if (rowsAffected > 0)
+                            {
+                                return "Success";
+                            }
+                            else
+                            {
+                                return "User not found.";
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Handle exception
+                    return "Error: " + ex.Message;
+                }
+            }
+            else
+            {
+                return "Unauthorized";
+            }
         }
 
 

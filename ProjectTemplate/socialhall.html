@@ -230,6 +230,7 @@
             // Initially hide the post creation elements
             $(".make-post-button").hide();
             $(".input-section").hide();
+            let isAdmin = false;
 
             // Check if the user is an admin
             $.ajax({
@@ -238,10 +239,12 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function (response) {
-                    if (response.d === true) {
+                    isAdmin = response.d;
+                    if (isAdmin) {
                         // If the user is an admin, show the "Make a Post" button
                         $(".make-post-button").show();
                     }
+                    fetchPosts(); // Fetch posts after determining admin status
                 },
                 error: function (error) {
                     console.error("Error checking admin status: ", error);
@@ -317,17 +320,19 @@
                     // Assign a class based on the post's category
                     var tagClass = getCategoryClass(post.Tag);
 
+                    // Conditionally add the delete button for admins
+                    var deleteButtonHtml = isAdmin ? '<button class="btn btn-danger btn-sm deletePost" data-post-id="' + post.PostId + '">Delete</button>' : '';
+
                     var postHtml = `<div class="post" id="post-${post.PostId}">
-                <div class="post-metadata">${post.Username} posted in <span class="post-tag ${tagClass}">${post.Tag}</span></div>
-                <div class="post-content">${post.Content}</div>
-                <div class="post-actions">
-                    <button class="btn btn-sm upvote${post.UserVote === 1 ? ' active' : ''}" data-post-id="${post.PostId}">&#x25B2;</button>
-                    <button class="btn btn-sm downvote${post.UserVote === -1 ? ' active' : ''}" data-post-id="${post.PostId}">&#x25BC;</button>
-                    <span class="post-votes">${post.Votes} votes</span>
-                    <button class="btn btn-secondary btn-sm editPost" data-post-id="${post.PostId}">Edit</button>
-                    <button class="btn btn-danger btn-sm deletePost" data-post-id="${post.PostId}">Delete</button>
-                </div>
-            </div>`;
+                    <div class="post-metadata">${post.Username} posted in <span class="post-tag ${tagClass}">${post.Tag}</span></div>
+                    <div class="post-content">${post.Content}</div>
+                    <div class="post-actions">
+                        <button class="btn btn-sm upvote${post.UserVote === 1 ? ' active' : ''}" data-post-id="${post.PostId}">&#x25B2;</button>
+                        <button class="btn btn-sm downvote${post.UserVote === -1 ? ' active' : ''}" data-post-id="${post.PostId}">&#x25BC;</button>
+                        <span class="post-votes">${post.Votes} votes</span>
+                        ${deleteButtonHtml}
+                    </div>
+                </div>`;
                     $("#postsContainer").append(postHtml);
                 });
             }

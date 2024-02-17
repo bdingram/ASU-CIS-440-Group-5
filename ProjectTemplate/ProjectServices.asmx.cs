@@ -277,58 +277,68 @@ namespace ProjectTemplate
 
         [WebMethod(EnableSession = true)]
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
-       public List<Post> GetPosts(string category = null)
-{
-    List<Post> posts = new List<Post>();
-
-    try
-    {
-        using (MySqlConnection conn = new MySqlConnection(getConString()))
+        public List<Post> GetPosts(string category = null)
         {
-            conn.Open();
-            string query = "SELECT idexec_posts, username, post_tag, post_content, votes FROM exec_posts";
-            
-            // Add a WHERE clause if a specific category is requested
-            if (!string.IsNullOrEmpty(category) && category != "All")
+            List<Post> posts = new List<Post>();
+
+            try
             {
-                query += " WHERE post_tag = @Category";
-            }
-
-            query += " ORDER BY votes DESC";
-
-            using (MySqlCommand cmd = new MySqlCommand(query, conn))
-            {
-                // Add the category parameter if filtering by category
-                if (!string.IsNullOrEmpty(category) && category != "All")
+                using (MySqlConnection conn = new MySqlConnection(getConString()))
                 {
-                    cmd.Parameters.AddWithValue("@Category", category);
-                }
+                    conn.Open();
+                    string query = "SELECT idexec_posts, username, post_tag, post_content, votes FROM exec_posts";
 
-                using (MySqlDataReader reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
+                    // Determine if we are filtering by a specific category
+                    if (!string.IsNullOrEmpty(category) && category != "All" && category != "Newest")
                     {
-                        posts.Add(new Post
+                        query += " WHERE post_tag = @Category";
+                    }
+
+                    // Adjust ORDER BY clause based on category
+                    if (category == "Newest")
+                    {
+                        // Assuming there is a created_at column for the timestamp
+                        query += " ORDER BY created_at DESC";
+                    }
+                    else
+                    {
+                        query += " ORDER BY votes DESC";
+                    }
+
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        // Add the category parameter if filtering by category
+                        if (!string.IsNullOrEmpty(category) && category != "All" && category != "Newest")
                         {
-                            PostId = Convert.ToInt32(reader["idexec_posts"]),
-                            Username = reader["username"].ToString(),
-                            Tag = reader["post_tag"].ToString(),
-                            Content = reader["post_content"].ToString(),
-                            Votes = Convert.ToInt32(reader["votes"])
-                        });
+                            cmd.Parameters.AddWithValue("@Category", category);
+                        }
+
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                posts.Add(new Post
+                                {
+                                    PostId = Convert.ToInt32(reader["idexec_posts"]),
+                                    Username = reader["username"].ToString(),
+                                    Tag = reader["post_tag"].ToString(),
+                                    Content = reader["post_content"].ToString(),
+                                    Votes = Convert.ToInt32(reader["votes"])
+                                });
+                            }
+                        }
                     }
                 }
             }
-        }
-    }
-    catch (Exception ex)
-    {
-        // Log or handle the exception appropriately
-        Console.WriteLine("Error fetching posts: " + ex.Message);
-    }
+            catch (Exception ex)
+            {
+                // Log or handle the exception appropriately
+                Console.WriteLine("Error fetching posts: " + ex.Message);
+            }
 
-    return posts;
-}
+            return posts;
+        }
+
 
 
 

@@ -83,6 +83,12 @@
                         var category = $(this).find('Category').text();
                         var response = $(this).find('Response').text();
 
+                        var colorDict = {
+                            'work environment': 'blue',
+                            'tools & resources': 'darkorange',
+                            'management': 'green',
+                        };
+
                         if (category !== "test category") { // Ignore "test category"
                             // Add the category to the Set (ensures uniqueness)
                             categoriesSet.add(category);
@@ -91,7 +97,7 @@
                             responses.push(convertResponseToNumeric(response));
 
                             var listItem = $('<li>')
-                                .html('Category: <strong>' + category + '</strong>' +
+                                .html('Category: <strong style="color:' + colorDict[category] + ';">' + category + '</strong>' +
                                     '<br>Response: <strong>' + response + '</strong>');
                             $('#surveyResponseList').append(listItem);
                         }

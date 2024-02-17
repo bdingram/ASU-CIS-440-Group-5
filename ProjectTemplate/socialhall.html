@@ -75,6 +75,17 @@
             border-radius: 15px;
             font-size: 12px;
         }
+            .post-tag.WorkEnvironment {
+                background: blue;
+            }
+
+            .post-tag.ToolsResources {
+                background: darkorange; /* Green */
+            }
+
+            .post-tag.Management {
+                background: green; /* Red */
+            }
 
         .post-actions {
             text-align: right;
@@ -300,25 +311,39 @@
             }
 
             function displayPosts(posts) {
-                // Sort posts by votes in descending order
-                posts.sort((a, b) => b.Votes - a.Votes);
-
                 $("#postsContainer").empty();
                 $.each(posts, function (index, post) {
+                    // Assign a class based on the post's category
+                    var tagClass = getCategoryClass(post.Tag);
+
                     var postHtml = `<div class="post" id="post-${post.PostId}">
-                            <div class="post-metadata">${post.Username} posted in <span class="post-tag">${post.Tag}</span></div>
-                            <div class="post-content">${post.Content}</div>
-                            <div class="post-actions">
-                                <button class="btn btn-sm upvote${post.UserVote === 1 ? ' active' : ''}" data-post-id="${post.PostId}">&#x25B2;</button>
-                                <button class="btn btn-sm downvote${post.UserVote === -1 ? ' active' : ''}" data-post-id="${post.PostId}">&#x25BC;</button>
-                                <span class="post-votes">${post.Votes} votes</span>
-                                <button class="btn btn-secondary btn-sm editPost" data-post-id="${post.PostId}">Edit</button>
-                                <button class="btn btn-danger btn-sm deletePost" data-post-id="${post.PostId}">Delete</button>
-                            </div>
-                        </div>`;
+                <div class="post-metadata">${post.Username} posted in <span class="post-tag ${tagClass}">${post.Tag}</span></div>
+                <div class="post-content">${post.Content}</div>
+                <div class="post-actions">
+                    <button class="btn btn-sm upvote${post.UserVote === 1 ? ' active' : ''}" data-post-id="${post.PostId}">&#x25B2;</button>
+                    <button class="btn btn-sm downvote${post.UserVote === -1 ? ' active' : ''}" data-post-id="${post.PostId}">&#x25BC;</button>
+                    <span class="post-votes">${post.Votes} votes</span>
+                    <button class="btn btn-secondary btn-sm editPost" data-post-id="${post.PostId}">Edit</button>
+                    <button class="btn btn-danger btn-sm deletePost" data-post-id="${post.PostId}">Delete</button>
+                </div>
+            </div>`;
                     $("#postsContainer").append(postHtml);
                 });
             }
+
+            function getCategoryClass(category) {
+                switch (category) {
+                    case 'Work Environment':
+                        return 'WorkEnvironment';
+                    case 'Tools & Resources':
+                        return 'ToolsResources';
+                    case 'Management':
+                        return 'Management';
+                    default:
+                        return '';
+                }
+            }
+
 
             $("#submitPost").click(function () {
                 var content = $("#postContent").val().trim();

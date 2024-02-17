@@ -689,5 +689,107 @@ namespace ProjectTemplate
         }
 
 
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///     Admin      /////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////
+        ///
+
+        [WebMethod]
+        public List<User> GetUsers()
+        {
+            List<User> users = new List<User>();
+            using (MySqlConnection con = new MySqlConnection(getConString()))
+            {
+                con.Open();
+                using (MySqlCommand cmd = new MySqlCommand("SELECT id, userid, admin FROM users", con))
+                {
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            users.Add(new User
+                            {
+                                UserId = Convert.ToInt32(reader["id"]),
+                                Username = reader["userid"].ToString(),
+                                IsAdmin = Convert.ToBoolean(reader["admin"])
+                            });
+                        }
+                    }
+                }
+            }
+            return users;
+        }
+
+        [WebMethod]
+        public bool UpdateAccountStatus(int userId, bool isAdmin)
+        {
+            try
+            {
+                using (MySqlConnection con = new MySqlConnection(getConString()))
+                {
+                    con.Open();
+                    using (MySqlCommand cmd = new MySqlCommand("UPDATE users SET admin = @IsAdmin WHERE id = @UserId", con))
+                    {
+                        // Ensure the parameter name matches your SQL column name and type
+                        cmd.Parameters.AddWithValue("@UserId", userId);
+                        cmd.Parameters.AddWithValue("@IsAdmin", isAdmin ? 1 : 0); // Explicit conversion if needed
+
+                        int rowsAffected = cmd.ExecuteNonQuery();
+                        return rowsAffected > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Consider logging the exception
+                // For debugging: throw new Exception("Update failed: " + ex.Message);
+                return false; // Or handle the error as appropriate
+            }
+        }
+
+
+        public class User
+        {
+            public int UserId { get; set; }
+            public string Username { get; set; }
+            public bool IsAdmin { get; set; }
+        }
+
+        [WebMethod(EnableSession = true)]
+        public bool IsAdmin()
+        {
+            if (Session["username"] != null)
+            {
+                string username = Session["username"].ToString();
+                using (MySqlConnection con = new MySqlConnection(getConString()))
+                {
+                    try
+                    {
+                        con.Open();
+                        using (MySqlCommand cmd = new MySqlCommand("SELECT admin FROM users WHERE userid = @Username", con))
+                        {
+                            cmd.Parameters.AddWithValue("@Username", username);
+                            object result = cmd.ExecuteScalar();
+                            if (result != null)
+                            {
+                                // Assuming 'admin' is stored as an integer (0 or 1)
+                                return Convert.ToInt32(result) == 1;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log error or handle it as required
+                        Console.WriteLine("Error in IsAdmin: " + ex.Message);
+                        return false;
+                    }
+                }
+            }
+            return false;
+        }
+
+
+
     }
 }

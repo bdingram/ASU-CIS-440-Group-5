@@ -1,0 +1,225 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>Admin Management Page</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script>
+		$(document).ready(function () {
+			loadUsers(); // Load users on page load
+
+			$('#updateAccountForm').submit(function (event) {
+				event.preventDefault(); // Prevent default form submission
+				var userId = $('#userId').val();
+				var isAdmin = $('#isAdmin').val();
+				updateAccountStatus(userId, isAdmin === '1');
+			});
+		});
+
+		function loadUsers() {
+			$.ajax({
+				type: "POST",
+				url: "ProjectServices.asmx/GetUsers",
+				contentType: "application/json; charset=utf-8",
+				dataType: "json",
+				success: function (response) {
+					var users = response.d; // Adjust according to the response format
+					var html = "";
+					users.forEach(function (user) {
+						html += "<tr><td>" + user.UserId + "</td><td>" + user.Username + "</td><td>" + (user.IsAdmin ? "Admin" : "Employee") + "</td><td><button onclick='fillForm(" + user.UserId + ", " + user.IsAdmin + ")'>Edit</button></td></tr>";
+					});
+					$('#usersTable tbody').html(html);
+				},
+				error: function (error) {
+					alert("Error loading users.");
+				}
+			});
+		}
+
+		function updateAccountStatus(userId, isAdmin) {
+			$.ajax({
+				type: "POST",
+				url: "ProjectServices.asmx/UpdateAccountStatus",
+				data: JSON.stringify({ userId: parseInt(userId), isAdmin: isAdmin }),
+				contentType: "application/json; charset=utf-8",
+				dataType: "json",
+				success: function (response) {
+					alert("Account status updated successfully.");
+					loadUsers(); // Refresh the users list
+				},
+				error: function (error) {
+					alert("Error updating account status.");
+				}
+			});
+		}
+
+        function fillForm(userId, isAdmin) {
+            $('#userId').val(userId);
+            $('#isAdmin').val(isAdmin ? "1" : "0");
+
+            // Apply highlight class
+            $('#isAdmin').addClass('highlight');
+
+            // Optionally, remove the highlight after a delay
+            setTimeout(function () {
+                $('#isAdmin').removeClass('highlight');
+            }, 2000); // Adjust time as needed
+        }
+
+
+	</script>
+
+	<style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e6e6e6;
+        }
+
+        .header {
+            background-color: #4a69bd;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .nav-bar {
+            background-color: #60a3bc;
+            overflow: hidden;
+        }
+
+            .nav-bar a {
+                float: left;
+                display: block;
+                color: white;
+                text-align: center;
+                padding: 14px 16px;
+                text-decoration: none;
+            }
+
+                .nav-bar a:hover {
+                    background-color: #82ccdd;
+                    color: black;
+                }
+
+        .content-container {
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4a69bd;
+            color: white;
+        }
+
+        button, .update-button {
+            background-color: #4a69bd;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+            button:hover, .update-button:hover {
+                background-color: #3d56a6;
+            }
+
+        form {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        select, input[type="hidden"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        label {
+            margin-top: 20px;
+        }
+
+        .highlight {
+            animation: highlightAnimation 2s ease-out;
+            border: 2px solid #4a69bd;
+        }
+
+        @keyframes highlightAnimation {
+            0% {
+                background-color: #bdc3c7;
+            }
+
+            50% {
+                background-color: #ecf0f1;
+            }
+
+            100% {
+                background-color: transparent;
+            }
+        }
+
+        .username-display {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            color: white;
+        }
+	</style>
+</head>
+<body>
+	<div class="header">
+		<h1>Admin Management</h1>
+        <div class="username-display"></div>
+	</div>
+    <div class="nav-bar">
+        <a href="home.html" class="back-button">Back to Home</a>
+	</div>
+	<div class="content-container">
+		<h2>Manage User Accounts</h2>
+		<table id="usersTable">
+			<thead>
+				<tr>
+					<th>User ID</th>
+					<th>Username</th>
+					<th>Status</th>
+					<th>Action</th>
+				</tr>
+			</thead>
+			<tbody>
+				<!-- User data will be loaded here -->
+			</tbody>
+		</table>
+		<h3>Update Account Status</h3>
+		<form id="updateAccountForm">
+			<input type="hidden" id="userId" name="userId" />
+			<label for="isAdmin">Account Status:</label>
+			<select id="isAdmin" name="isAdmin">
+				<option value="0">Employee</option>
+				<option value="1">Admin</option>
+			</select>
+			<button type="submit">Update Status</button>
+		</form>
+	</div>
+</body>
+</html>

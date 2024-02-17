@@ -167,7 +167,7 @@
 <body>
     <!-- Header -->
     <div class="header">
-        <h1>Feedbacker</h1>
+        <h1>Feedbacker Social Hall</h1>
         <div class="username-display"></div>
         <a href="login.html" class="logout-button">Logout</a>
     </div>
@@ -196,7 +196,7 @@
 
     <!-- Input Section for New Posts -->
         <div class="input-section">
-            <h2>What's on your mind?</h2>
+            <h2>Make a Post</h2>
             <textarea id="postContent" class="form-control" rows="3" placeholder="Share something..."></textarea>
             <select id="postTag" class="form-control mt-2">
                 <option value="Work Environment">Work Environment</option>
@@ -214,9 +214,43 @@
 
     <script>
         $(document).ready(function () {
+
+            // Initially hide the post creation elements
+            $(".make-post-button").hide();
+            $(".input-section").hide();
+
+            // Check if the user is an admin
+            $.ajax({
+                type: "POST",
+                url: "ProjectServices.asmx/IsAdmin",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    if (response.d === true) {
+                        // If the user is an admin, show the "Make a Post" button
+                        $(".make-post-button").show();
+                    }
+                },
+                error: function (error) {
+                    console.error("Error checking admin status: ", error);
+                }
+            });
+
             // Toggle input section visibility when "Make a Post" button is clicked
             $(".make-post-button").click(function () {
                 $(".input-section").toggle();
+            });
+
+            $.ajax({
+                type: "POST",
+                url: "ProjectServices.asmx/IsAdmin",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    if (response.d === true) { // Assuming the response is directly the boolean
+                        $(".nav-bar").append('<a href="admin.html">Admin</a>');
+                    }
+                }
             });
 
 

@@ -43,6 +43,18 @@
 
             $.ajax({
                 type: "POST",
+                url: "ProjectServices.asmx/IsAdmin",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    if (response.d === true) { // Assuming the response is directly the boolean
+                        $(".nav-bar").append('<a href="admin.html">Admin</a>');
+                    }
+                }
+            });
+
+            $.ajax({
+                type: "POST",
                 url: "ProjectServices.asmx/GetUsername",
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",

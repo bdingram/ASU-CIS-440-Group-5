@@ -109,6 +109,7 @@
     <Content Include="Global.asax" />
     <Content Include="CreateUser.html" />
     <Content Include="home.html" />
+    <Content Include="admin.html" />
     <Content Include="socialhall.html" />
     <Content Include="survey.html" />
     <Content Include="login.html" />

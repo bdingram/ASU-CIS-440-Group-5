@@ -173,6 +173,74 @@
         }
 
 
+                //TEST FOR BADGE/// COMMENT OUT checkForNewPosts before testing
+            
+           /*   $(document).ready(function() {
+             // Manually show the badge with a static number
+                $("#newPostsBadge").text("5").show();
+
+                // Example of hiding the badge on clicking the Social Hall link
+                $("#socialHallLink").click(function() {
+                    $("#newPostsBadge").hide();
+                });
+            });     */
+
+
+
+
+
+        // checks for new posts
+        function checkForNewPosts() {
+        $.ajax({
+            type: "POST",
+            url: "ProjectServices.asmx/GetNewPostsCount",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                if (response.d > 0) {
+                    $("#newPostsBadge").text(response.d).show();
+                } else {
+                    $("#newPostsBadge").hide();
+                }
+            },
+            error: function () {
+                console.log('Error checking for new posts');
+            }
+        });
+        }
+
+        // Poll for new posts every 30 sec
+        setInterval(checkForNewPosts, 30000);
+        
+        // Ensure this is called on document ready to immediately check for new posts
+        $(document).ready(function () {
+            checkForNewPosts();
+        });
+        
+
+        $("#socialHallLink").click(function() {
+        // Hide the badge and update the last_checked timestamp
+        $("#newPostsBadge").hide();
+    
+        $.ajax({
+            type: "POST",
+            url: "ProjectServices.asmx/UpdateLastChecked",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function () {
+                console.log('Last checked updated');
+            },
+            error: function () {
+                console.log('Error updating last checked');
+            }
+        });
+        });
+
+
+
+      
+    
+
 
 
 
@@ -392,6 +460,29 @@
             right: 20px;
             top: 20px;
         }
+
+        #newPostsBadge {
+            display: none;
+            background-color: red;
+            border-radius: 50%; /* Makes the badge circular */
+            color: white;
+            font-size: 12px; /* Adjust as needed */
+            width: 20px; /* Adjust as needed */
+            height: 20px; /* Adjust as needed */
+            text-align: center;
+            line-height: 20px; /* Aligns text vertically */
+            position: absolute;
+            top: 0;
+            right: 0;
+           
+  }
+
+        /* Adjust the link style to position the badge correctly */
+        #socialHallLink {
+            position: relative; /* Establishes a positioning context for the badge */
+            padding-right: 30px; /* Adds space for the badge */
+        }
+
     </style>
 
 
@@ -405,7 +496,8 @@
     </div>
     <div class="nav-bar">
         <a href="#home">Home</a>
-        <a href="socialhall.html">Social Hall</a>
+        <a href="socialhall.html" id="socialHallLink">Social Hall <span id="newPostsBadge" 
+      ></span> </a>
     </div>
     <div class="content-container">
         <div class="main-content">
@@ -428,5 +520,8 @@
     <div class="chart-container">
         <canvas id="surveyResponseChart"></canvas>
     </div>
+
+    
+
 </body>
 </html>

@@ -283,6 +283,21 @@
                 }
             });
 
+            // logs that users see new posts 
+            $.ajax({
+                type: "POST",
+                url: "ProjectServices.asmx/UpdateLastChecked",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function () {
+                    console.log("Last checked updated.");
+                },
+                error: function (error) {
+                    console.error("Error updating last checked:", error);
+                 }
+            });
+
+
             $("#categoryFilter").change(function() {
                 var selectedCategory = $(this).val();
                 fetchPosts(selectedCategory);

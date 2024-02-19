@@ -128,6 +128,77 @@ namespace ProjectTemplate
             Session.Abandon(); // This will destroy the session altogether
         }
 
+        ///////////////////////Notification/////////////////////////////
+        [WebMethod(EnableSession = true)]
+        public string UpdateLastChecked()
+        {
+            // Check if the user is logged in
+            if (Session["username"] != null)
+            {
+                string username = Session["username"].ToString();
+                try
+                {
+                    using (MySqlConnection connection = new MySqlConnection(getConString()))
+                 {
+                        connection.Open();
+                        string query = "UPDATE users SET last_checked = NOW() WHERE userid = @Username";
+                        using (MySqlCommand command = new MySqlCommand(query, connection))
+                        {
+                            command.Parameters.AddWithValue("@Username", username);
+                            command.ExecuteNonQuery();
+                            return "Last checked time updated successfully.";
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log the exception for troubleshooting
+                    return "Error in UpdateLastCheckedTime: " + ex.Message;
+                }
+            }
+            else
+            {
+                return "User not logged in.";
+            }
+        }
+
+        
+        // Fetch new posts since the user's last visit to social hall
+        [WebMethod(EnableSession = true)]
+        public int GetNewPostsCount()
+        {
+            if (Session["username"] == null)
+                return -1; // User not logged in
+
+            string username = Session["username"].ToString();
+            int newPostsCount = 0;
+
+            using (MySqlConnection conn = new MySqlConnection(getConString()))
+            {
+                conn.Open();
+                // The subquery orders the last_checked timestamps in descending order and limits the result to 1 (most recent)
+                string query = @"SELECT COUNT(*) FROM exec_posts 
+                                WHERE created_at > (
+                                    SELECT last_checked FROM users 
+                                    WHERE userid = @Username 
+                                    ORDER BY last_checked DESC 
+                                    LIMIT 1
+                                )";
+                     
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Username", username);
+                    newPostsCount = Convert.ToInt32(cmd.ExecuteScalar());
+                }
+            }
+            return newPostsCount;
+        }
+
+        
+
+
+        /////////////////// End Notification ///////////////////////////
+
 
         /////////////////////// Social Media ////////////////////////////////////
         /// <summary>

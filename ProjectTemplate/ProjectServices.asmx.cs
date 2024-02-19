@@ -141,7 +141,7 @@ namespace ProjectTemplate
                     using (MySqlConnection connection = new MySqlConnection(getConString()))
                  {
                         connection.Open();
-                        string query = "UPDATE users SET last_checked = NOW() WHERE username = @Username";
+                        string query = "UPDATE users SET last_checked = NOW() WHERE userid = @Username";
                         using (MySqlCommand command = new MySqlCommand(query, connection))
                         {
                             command.Parameters.AddWithValue("@Username", username);
@@ -180,7 +180,7 @@ namespace ProjectTemplate
                 string query = @"SELECT COUNT(*) FROM exec_posts 
                                 WHERE created_at > (
                                     SELECT last_checked FROM users 
-                                    WHERE username = @Username 
+                                    WHERE userid = @Username 
                                     ORDER BY last_checked DESC 
                                     LIMIT 1
                                 )";

@@ -163,7 +163,7 @@ namespace ProjectTemplate
         }
 
         
-        // fetch new posts since users last visit to social hall
+        // Fetch new posts since the user's last visit to social hall
         [WebMethod(EnableSession = true)]
         public int GetNewPostsCount()
         {
@@ -176,9 +176,15 @@ namespace ProjectTemplate
             using (MySqlConnection conn = new MySqlConnection(getConString()))
             {
                 conn.Open();
+                // The subquery orders the last_checked timestamps in descending order and limits the result to 1 (most recent)
                 string query = @"SELECT COUNT(*) FROM exec_posts 
-                                WHERE created_at > (SELECT last_checked FROM users WHERE username = @Username)";
-                         
+                                WHERE created_at > (
+                                    SELECT last_checked FROM users 
+                                    WHERE username = @Username 
+                                    ORDER BY last_checked DESC 
+                                    LIMIT 1
+                                )";
+                     
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@Username", username);
@@ -187,6 +193,7 @@ namespace ProjectTemplate
             }
             return newPostsCount;
         }
+
         
 
 

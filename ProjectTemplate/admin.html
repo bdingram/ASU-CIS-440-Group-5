@@ -8,13 +8,14 @@
 			loadUsers(); // Load users on page load
 
 			$('#updateAccountForm').submit(function (event) {
-				event.preventDefault(); // Prevent default form submission
+				event.preventDefault();
 				var userId = $('#userId').val();
 				var isAdmin = $('#isAdmin').val();
 				updateAccountStatus(userId, isAdmin === '1');
 			});
 		});
 
+        // Loads all users from the database
         function loadUsers() {
             $.ajax({
                 type: "POST",
@@ -22,7 +23,7 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function (response) {
-                    var users = response.d; // Adjust according to the response format
+                    var users = response.d;
                     var html = "";
                     users.forEach(function (user) {
                         html += `<tr>
@@ -43,11 +44,12 @@
             });
         }
 
+        // Deletes a user from the database
         function deleteUser(userId) {
             if (confirm('Are you sure you want to delete this user?')) {
                 $.ajax({
                     type: "POST",
-                    url: "ProjectServices.asmx/DeleteUser", // Adjust URL to your WebMethod for deletion
+                    url: "ProjectServices.asmx/DeleteUser",
                     data: JSON.stringify({ userId: userId }),
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
@@ -66,6 +68,7 @@
             }
         }
 
+        // Changes account status between admin or employee
 		function updateAccountStatus(userId, isAdmin) {
 			$.ajax({
 				type: "POST",
@@ -83,17 +86,18 @@
 			});
 		}
 
+        // form to change account status
         function fillForm(userId, isAdmin) {
             $('#userId').val(userId);
             $('#isAdmin').val(isAdmin ? "1" : "0");
 
-            // Apply highlight class
+            // Highlight update bar at the bottom
             $('#isAdmin').addClass('highlight');
 
-            // Optionally, remove the highlight after a delay
+            // Remove highlight after a delay
             setTimeout(function () {
                 $('#isAdmin').removeClass('highlight');
-            }, 2000); // Adjust time as needed
+            }, 2000);
         }
 
 
@@ -238,7 +242,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				<!-- User data will be loaded here -->
+				<!-- User data here -->
 			</tbody>
 		</table>
 		<h3>Update Account Status</h3>

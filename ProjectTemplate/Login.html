@@ -63,7 +63,6 @@
     <!--END OF YOUR OWN JAVASCRIPT-->
     <!--AND YOUR OWN CSS CAN GO HERE AS WELL-->
     <style>
-        /* General Body Styles */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f0f2f5;
@@ -75,36 +74,31 @@
             color: #333;
         }
 
-        /* Form Container */
         .form-container {
-            width: 300px; /* Adjust the width as needed */
+            width: 300px;
         }
 
-        /* Labels */
         label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
         }
 
-        /* Input Fields */
         input[type="text"], input[type="password"] {
             width: 100%;
             padding: 10px;
             border: 1px solid #ced4da;
             border-radius: 5px;
             font-size: 16px;
-            margin-bottom: 20px; /* Space between input fields */
+            margin-bottom: 20px;
         }
 
-            /* Focus Effect on Input Fields */
             input[type="text"]:focus, input[type="password"]:focus {
                 outline: none;
                 border-color: #0d6efd;
                 box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
             }
 
-        /* Submit Button */
         #loginButton {
             width: 108%;
             padding: 10px;
@@ -117,7 +111,6 @@
             transition: background-color 0.3s;
         }
 
-            /* Hover Effect on Submit Button */
             #loginButton:hover {
                 background-color: #0b5ed7;
             }
@@ -139,7 +132,7 @@
         </div>
         <div>
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required> <!-- Changed type to "password" -->
+            <input type="password" id="password" name="password" required>
         </div>
         <div>
             <button id="loginButton" onclick="javascript: logon();">Log In</button>

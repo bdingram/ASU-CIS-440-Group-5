@@ -201,7 +201,8 @@ namespace ProjectTemplate
 
 
         /////////////////////// Social Media ////////////////////////////////////
-        /// <summary>
+
+        /// Gets the currently logged in user
         [WebMethod(EnableSession = true)]
         public string GetUsername()
         {
@@ -215,7 +216,7 @@ namespace ProjectTemplate
             }
         }
 
-        /// </summary>
+        /// Post class
         public class Post
         {
             public int PostId { get; set; }
@@ -225,8 +226,6 @@ namespace ProjectTemplate
             public int Votes {  get; set; }
         }
 
-
-        // This could be replaced with actual database logic
         private static List<Post> posts = new List<Post>();
 
         public Post FindPostById(int postId)
@@ -260,7 +259,6 @@ namespace ProjectTemplate
                     }
                     catch (Exception ex)
                     {
-                        // Log or handle the exception as needed
                         Console.WriteLine("An error occurred: " + ex.Message);
                     }
                 }
@@ -269,9 +267,11 @@ namespace ProjectTemplate
             return foundPost;
         }
 
+        // Allows users to edit their previously existing posts
         [WebMethod(EnableSession = true)]
         public string EditPost(int postId, string newContent)
         {
+            // Checks if logged in
             if (Session["username"] == null)
             {
                 return "User not logged in.";
@@ -280,6 +280,7 @@ namespace ProjectTemplate
             string sessionUsername = Session["username"].ToString();
             try
             {
+                // Users can edit their own posts
                 using (MySqlConnection connection = new MySqlConnection(getConString()))
                 {
                     string query = "UPDATE exec_posts SET post_content = @Content WHERE idexec_posts = @PostId AND username = @Username";
@@ -307,10 +308,11 @@ namespace ProjectTemplate
             }
         }
 
-
+        // Deletes a post from the database
         [WebMethod(EnableSession = true)]
         public string DeletePost(int postId)
         {
+            // Checks if logged in
             if (Session["username"] == null)
             {
                 return "User not logged in.";
@@ -319,6 +321,7 @@ namespace ProjectTemplate
             string sessionUsername = Session["username"].ToString();
             try
             {
+                // Deletes post if a specific user made the post and is an Admin
                 using (MySqlConnection connection = new MySqlConnection(getConString()))
                 {
                     string query = "DELETE FROM exec_posts WHERE idexec_posts = @PostId AND username = @Username";
@@ -345,7 +348,7 @@ namespace ProjectTemplate
             }
         }
 
-
+        // Gets all the posts from the database
         [WebMethod(EnableSession = true)]
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
         public List<Post> GetPosts(string category = null)
@@ -359,16 +362,15 @@ namespace ProjectTemplate
                     conn.Open();
                     string query = "SELECT idexec_posts, username, post_tag, post_content, votes FROM exec_posts";
 
-                    // Determine if we are filtering by a specific category
+                    // Check if filtering by category
                     if (!string.IsNullOrEmpty(category) && category != "All" && category != "Newest")
                     {
                         query += " WHERE post_tag = @Category";
                     }
 
-                    // Adjust ORDER BY clause based on category
+                    // ORDER BY based on category
                     if (category == "Newest")
                     {
-                        // Assuming there is a created_at column for the timestamp
                         query += " ORDER BY created_at DESC";
                     }
                     else
@@ -403,7 +405,6 @@ namespace ProjectTemplate
             }
             catch (Exception ex)
             {
-                // Log or handle the exception appropriately
                 Console.WriteLine("Error fetching posts: " + ex.Message);
             }
 
@@ -441,7 +442,6 @@ namespace ProjectTemplate
             }
             catch (Exception ex)
             {
-                // Log or handle exception
                 return "Error: " + ex.Message;
             }
         }
@@ -449,7 +449,7 @@ namespace ProjectTemplate
         [WebMethod(EnableSession = true)]
         public string VotePost(int postId, int vote)
         {
-            // Check if the user is authenticated
+            // Check if the user is logged in
             if (Session["username"] == null)
             {
                 return "User not authenticated";
@@ -492,7 +492,7 @@ namespace ProjectTemplate
                         }
                     }
 
-                    // Remove any existing vote by the user for this post
+                    // Remove an existing vote by the user for this post
                     string removeVoteQuery = "DELETE FROM post_votes WHERE user_id = @UserId AND post_id = @PostId";
                     using (MySqlCommand removeVoteCommand = new MySqlCommand(removeVoteQuery, connection))
                     {
@@ -501,7 +501,7 @@ namespace ProjectTemplate
                         removeVoteCommand.ExecuteNonQuery();
                     }
 
-                    // Insert new vote if it's not zero
+                    // If user hasn't voted, let them vote
                     if (vote != 0)
                     {
                         // Record the user's vote
@@ -567,7 +567,7 @@ namespace ProjectTemplate
 
         }
 
-        // New method to handle survey submission
+        // Handles Survey Submission
         [WebMethod(EnableSession = true)]
         public string SubmitSurvey(List<SurveyResponse> responses)
         {
@@ -582,7 +582,7 @@ namespace ProjectTemplate
                         string query = "INSERT INTO survey_responses (category, response) VALUES (@category, @response)";
                         MySqlCommand cmd = new MySqlCommand(query, con);
 
-                        // Use dictionary key-value pair to set parameters
+                        // Use dictionary to set parameters
                         cmd.Parameters.AddWithValue("@category", entry.Category);
                         cmd.Parameters.AddWithValue("@response", entry.Response);
 
@@ -695,21 +695,17 @@ namespace ProjectTemplate
             try
             {
                 MySqlCommand cmd = new MySqlCommand(testQuery, con);
-                // Use parameterized queries to prevent SQL injection
                 cmd.Parameters.AddWithValue("@Username", username);
 
                 MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
                 DataTable table = new DataTable();
                 adapter.Fill(table);
 
-                // Return true if user exists (found rows), false otherwise
+                // Return true if user exists
                 return table.Rows.Count > 0;
             }
             catch (Exception e)
             {
-                // Consider logging the exception details here
-                // Rethrowing exceptions in this manner can be problematic; 
-                // it's generally better to handle exceptions or let them bubble up naturally
                 throw;
             }
         }
